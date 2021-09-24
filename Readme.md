@@ -233,5 +233,8 @@ export default HomeScreen;
 
 # For Developers
 
-If you made changes to the SDK (in the cpx_research_sdk_react_native sub folder), you need to update the version number in the package json in the sub folder and publish these changes to npm.
-In order to do that, run `npm publish` from the sub folder (not from the root directory!)
+If you made changes to the SDK (in the 'cpx_research_sdk_react_native' sub folder), you need to do the following steps in order to publish a new version:
+- change directory into the 'cpx_research_sdk_react_native' sub folder: `cd cpx_research_sdk_react_native`
+- if it exits, delete the cpx_research_sdk_react_native/lib folder
+- run `yarn build` in order to compile the TypeScript Code to regular JavaScript
+- update the version number in the package.json in the sub folder and publish these changes to npm with `npm publish` (still from the sub folder!)

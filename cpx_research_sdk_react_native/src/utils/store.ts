@@ -45,6 +45,7 @@ export interface ICpxConfig
   isHidden?: boolean;
   notificationWidget?: INotificationWidgetStyle & IWidgetConfig;
   onSurveysUpdate?: (surveys: any[]) => void;
+  onTextsUpdate?: (texts: ITexts) => void;
   onTransactionsUpdate?: (transactions: any[]) => void;
   sidebarWidget?: ISidebarWidgetStyle & IWidgetConfig;
   userId: string;
@@ -59,6 +60,13 @@ interface IWidgetImages
   sidebar?: string;
 }
 
+export interface ITexts
+{
+  currencyPlural: string;
+  currencySingular: string;
+  shortcutMin: string;
+}
+
 export interface IStore
 {
   config: ICpxConfig;
@@ -68,11 +76,18 @@ export interface IStore
   singleSurveyIdForWebView?: any;
   subscribers: ((store: IStore) => void)[];
   surveys: any[];
+  texts: ITexts;
   transactions: any[];
   widgetImages: IWidgetImages;
 }
 
 export const StoreContext = React.createContext<IStore>(null as unknown as IStore);
+
+export const emptyTexts: ITexts = {
+  currencyPlural: "",
+  currencySingular: "",
+  shortcutMin: "",
+};
 
 export const createStore = (config: ICpxConfig): IStore => ({
   config,
@@ -87,6 +102,7 @@ export const createStore = (config: ICpxConfig): IStore => ({
   singleSurveyIdForWebView: undefined,
   subscribers: [],
   surveys: [],
+  texts: emptyTexts,
   transactions: [],
   widgetImages: {},
 });

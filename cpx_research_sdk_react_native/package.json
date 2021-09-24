@@ -8,6 +8,7 @@
     "assets/*"
   ],
   "scripts": {
+    "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Dualmeta (https://www.dualmeta.io)",

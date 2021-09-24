@@ -1,5 +1,7 @@
 import { StackScreenProps } from "@react-navigation/stack";
 import CpxResearch from "cpx-research-sdk-react-native/src";
+import { CpxSurveyCards } from "cpx-research-sdk-react-native/src/cpxSurveyCards/CpxSurveyCards";
+import { emptyTexts, ITexts } from "cpx-research-sdk-react-native/src/utils/store";
 import React, { FunctionComponent, useRef, useState } from "react";
 import {
   SafeAreaView,
@@ -16,6 +18,9 @@ const HomeScreen: FunctionComponent<StackScreenProps<any>> = ({ navigation }) =>
   const fetchSurveysAndTransactionsRef = useRef<() => Promise<void> | undefined>();
   const openWebViewRef = useRef<(surveyId?: string) => void | undefined>();
 
+  const [surveys, setSurveys] = useState<any[]>([]);
+  const [texts, setTexts] = useState<ITexts>(emptyTexts);
+
   const [isCpxLayerHidden, setIsCpxLayerHidden] = useState(false);
 
   return (
@@ -24,7 +29,8 @@ const HomeScreen: FunctionComponent<StackScreenProps<any>> = ({ navigation }) =>
         accentColor="#ff9800"
         appId="1"
         userId="2"
-        onSurveysUpdate={(surveys) => console.log("onSurveysUpdate Callback", surveys)}
+        onSurveysUpdate={surveys => setSurveys(surveys)}
+        onTextsUpdate={texts => setTexts(texts)}
         onTransactionsUpdate={(transactions) => console.log("onSurveysUpdate Callback", transactions)}
         bindMarkTransactionAsPaid={markTransactionAsPaid => markTransactionAsPaidRef.current = markTransactionAsPaid}
         bindFetchSurveysAndTransactions={fetchSurveysAndTransactions => fetchSurveysAndTransactionsRef.current = fetchSurveysAndTransactions}
@@ -63,6 +69,7 @@ const HomeScreen: FunctionComponent<StackScreenProps<any>> = ({ navigation }) =>
       />
       <SafeAreaView style={styles.appWrapper}>
         <View style={styles.viewContainer}>
+          <CpxSurveyCards surveys={surveys} texts={texts}/>
           <Text style={styles.text}>React Native SDK Demo App</Text>
           <Text style={styles.text2}>CPX Research</Text>
           <TouchableOpacity style={styles.button} onPress={() => navigation.navigate({ name: "Page 2", params: {} })}>

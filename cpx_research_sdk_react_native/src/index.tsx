@@ -101,6 +101,16 @@ class CpxResearch extends React.Component<ICpxConfig, IStore>
     }
   }
 
+  private onTextsUpdate(): void
+  {
+    console.log("texts changed!");
+
+    if(this.props.onTextsUpdate)
+    {
+      this.props.onTextsUpdate(this.state.texts);
+    }
+  }
+
   private onTransactionsUpdate(): void
   {
     console.log("transactions changed! " + this.state.transactions?.length + " transactions available");
@@ -140,6 +150,11 @@ class CpxResearch extends React.Component<ICpxConfig, IStore>
     if(JSON.stringify(prevState.transactions) !== JSON.stringify(this.state.transactions))
     {
       this.onTransactionsUpdate();
+    }
+
+    if(JSON.stringify(prevState.texts) !== JSON.stringify(this.state.texts))
+    {
+      this.onTextsUpdate();
     }
   }
 

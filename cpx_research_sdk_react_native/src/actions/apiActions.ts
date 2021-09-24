@@ -3,7 +3,9 @@ import axios, { AxiosResponse, AxiosRequestConfig } from "axios";
 
 import { endpoints, urls } from "../utils/globals";
 import { getRequestParams } from "../utils/helpers";
-import { ICornerWidgetStyle, INotificationWidgetStyle, ISidebarWidgetStyle, IStore } from "../utils/store";
+import {
+  emptyTexts, ICornerWidgetStyle, INotificationWidgetStyle, ISidebarWidgetStyle, IStore
+} from "../utils/store";
 
 export const fetchSurveysAndTransactions = async (store: IStore): Promise<void> =>
 {
@@ -35,6 +37,7 @@ export const fetchSurveysAndTransactions = async (store: IStore): Promise<void> 
     storeCopy.surveys = [];
     storeCopy.transactions = [];
     storeCopy.singleSurveyIdForWebView = undefined;
+    storeCopy.texts = emptyTexts;
 
     store = storeCopy;
     store.notify();
@@ -46,6 +49,11 @@ export const fetchSurveysAndTransactions = async (store: IStore): Promise<void> 
   storeCopy.surveys = response.data.surveys;
   storeCopy.singleSurveyIdForWebView = response.data.surveys?.[0]?.id;
   storeCopy.transactions = response.data.transactions;
+  storeCopy.texts = {
+    currencyPlural: response.data.text?.currency_name_plural,
+    currencySingular: response.data.text?.currency_name_singular,
+    shortcutMin: response.data.text?.shortcurt_min,
+  };
 
   store = storeCopy;
   store.notify();
