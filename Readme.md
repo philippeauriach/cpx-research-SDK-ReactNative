@@ -232,6 +232,7 @@ export default HomeScreen;
 
 
 # For Developers
+Before developing, run `yarn prepareDevelopment` from the root folder. 
 
 If you made changes to the SDK (in the 'cpx_research_sdk_react_native' sub folder), you need to do the following steps in order to publish a new version:
 - change directory into the 'cpx_research_sdk_react_native' sub folder: `cd cpx_research_sdk_react_native`

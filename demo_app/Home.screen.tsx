@@ -69,7 +69,17 @@ const HomeScreen: FunctionComponent<StackScreenProps<any>> = ({ navigation }) =>
       />
       <SafeAreaView style={styles.appWrapper}>
         <View style={styles.viewContainer}>
-          <CpxSurveyCards surveys={surveys} texts={texts}/>
+          <CpxSurveyCards
+            surveys={surveys}
+            texts={texts}
+            config={{
+              accentColor: "#43eadc",
+              cardBackgroundColor: "white",
+              inactiveStarColor: "#dfdfdfff",
+              starColor: "#ffc400",
+              textColor: "black"
+            }}
+          />
           <Text style={styles.text}>React Native SDK Demo App</Text>
           <Text style={styles.text2}>CPX Research</Text>
           <TouchableOpacity style={styles.button} onPress={() => navigation.navigate({ name: "Page 2", params: {} })}>
