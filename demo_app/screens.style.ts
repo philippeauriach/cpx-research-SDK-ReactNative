@@ -18,14 +18,9 @@ const styles = StyleSheet.create({
     fontWeight: "600"
   },
   text: {
-    fontSize: 22,
+    fontSize: 23,
     fontWeight: "700",
-    marginBottom: 14,
-    marginTop: 40
-  },
-  text2: {
-    fontSize: 18,
-    marginBottom: 40,
+    marginBottom: 20,
   },
   viewContainer: {
     alignItems: "center",

@@ -69,23 +69,20 @@ const HomeScreen: FunctionComponent<StackScreenProps<any>> = ({ navigation }) =>
       />
       <SafeAreaView style={styles.appWrapper}>
         <View style={styles.viewContainer}>
+          <Text style={styles.text}>React Native SDK Demo App</Text>
           <CpxSurveyCards
             surveys={surveys}
             texts={texts}
             config={{
-              accentColor: "#43eadc",
+              accentColor: "#41d7e5",
               cardBackgroundColor: "white",
               inactiveStarColor: "#dfdfdfff",
               starColor: "#ffc400",
               textColor: "black"
             }}
+            openWebView={openWebViewRef.current}
           />
-          <Text style={styles.text}>React Native SDK Demo App</Text>
-          <Text style={styles.text2}>CPX Research</Text>
-          <TouchableOpacity style={styles.button} onPress={() => navigation.navigate({ name: "Page 2", params: {} })}>
-            <Text style={styles.buttonText}>Next Page</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={() => fetchSurveysAndTransactionsRef.current?.()}>
+          <TouchableOpacity style={[styles.button, { marginTop: 20 }]} onPress={() => fetchSurveysAndTransactionsRef.current?.()}>
             <Text style={styles.buttonText}>Fetch surveys and transactions</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.button} onPress={() => markTransactionAsPaidRef.current?.("123", "345")}>
@@ -99,6 +96,9 @@ const HomeScreen: FunctionComponent<StackScreenProps<any>> = ({ navigation }) =>
           </TouchableOpacity>
           <TouchableOpacity style={styles.button} onPress={() => openWebViewRef.current?.(/* pass optional surveyId here */)}>
             <Text style={styles.buttonText}>Open Webview</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={() => navigation.navigate({ name: "Page 2", params: {} })}>
+            <Text style={styles.buttonText}>Next Page</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>

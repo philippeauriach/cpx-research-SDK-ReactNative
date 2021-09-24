@@ -42,7 +42,7 @@ class CpxResearch extends React.Component<ICpxConfig, IStore>
   {
     this.fetchSurveysAndTransactionsInterval = setInterval(
       async () => fetchSurveysAndTransactions(this.state),
-      10000
+      10000 // TODO: Change to 120000
     );
   };
 

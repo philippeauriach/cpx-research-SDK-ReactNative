@@ -1,5 +1,7 @@
 import React, { FunctionComponent } from "react";
-import { Image, ScrollView, Text, View } from "react-native";
+import {
+  Image, ScrollView, Text, TouchableOpacity, View
+} from "react-native";
 
 import { ITexts } from "../utils/store";
 import styles from "./CpxSurveyCards.style";
@@ -19,14 +21,16 @@ interface IConfig
 interface IProps
 {
   config?: IConfig;
+  openWebView: ((surveyId?: string) => void) | undefined;
   surveys: any[];
   texts: ITexts;
 }
 
 export const CpxSurveyCards: FunctionComponent<IProps> = ({
   config,
+  openWebView,
   surveys,
-  texts
+  texts,
 }) =>
 {
   const relevantSurveys = surveys.slice(0, 10);
@@ -43,13 +47,20 @@ export const CpxSurveyCards: FunctionComponent<IProps> = ({
         {
           const stars = survey.statistics_rating_avg || 0;
           const disabledStars = 5 - stars;
-          const accentColor = config?.accentColor || "#43eadc";
+
+          const accentColor = config?.accentColor || "#40e2d3";
+          const cardBackgroundColor = config?.cardBackgroundColor || "white";
+          const textColor = config?.textColor || "black";
+          const starColor = config?.starColor || "#ffc400";
+          const inActiveStarColor = config?.inactiveStarColor || "#dfdfdfff";
 
           return (
-            <View
+            <TouchableOpacity
+              onPress={() => openWebView?.(survey.id)}
+              activeOpacity={.5}
               style={[
                 styles.card,
-                { backgroundColor: config?.cardBackgroundColor || "white" },
+                { backgroundColor: cardBackgroundColor },
                 index === 0 ? { marginLeft: 12 } : { },
                 index === relevantSurveys.length - 1 ? { marginRight: 12 } : { }
               ]}
@@ -58,7 +69,7 @@ export const CpxSurveyCards: FunctionComponent<IProps> = ({
               <Text style={[styles.currency, { color: accentColor }]}>{survey.payout === 1 ? texts.currencySingular : texts.currencyPlural}</Text>
               <View style={styles.timeNeededWrapper}>
                 <Image style={[styles.clockIcon, { tintColor: accentColor }]} source={clockIcon}/>
-                <Text style={[styles.timeNeededText, { color: config?.textColor || "black" }]}>
+                <Text style={[styles.timeNeededText, { color: textColor }]}>
                   {survey.loi} {texts.shortcutMin}
                 </Text>
               </View>
@@ -66,19 +77,19 @@ export const CpxSurveyCards: FunctionComponent<IProps> = ({
                 {[...Array(stars)].map((_, index2) => (
                   <Image
                     key={index2}
-                    style={[styles.star, { tintColor: config?.starColor || "#ffc400" }]}
+                    style={[styles.star, { tintColor: starColor }]}
                     source={starIcon}
                   />
                 ))}
                 {[...Array(disabledStars)].map((_, index2) => (
                   <Image
                     key={"2-" + index2}
-                    style={[styles.star, { tintColor: config?.inactiveStarColor || "#dfdfdfff" }]}
+                    style={[styles.star, { tintColor: inActiveStarColor }]}
                     source={starIcon}
                   />
                 ))}
               </View>
-            </View>
+            </TouchableOpacity>
           );
         })}
       </ScrollView>
