@@ -66,7 +66,6 @@ const styles = StyleSheet.create({
   },
   wrapper: {
     alignItems: "center",
-    backgroundColor: "red",
     flexDirection: "row",
     height: 150
   }
