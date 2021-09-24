@@ -1,5 +1,5 @@
 import React, { FunctionComponent } from "react";
-import { Image, Text, View } from "react-native";
+import { Image, ScrollView, Text, View } from "react-native";
 
 import { ITexts } from "../utils/store";
 import styles from "./CpxSurveyCards.style";
@@ -29,7 +29,7 @@ export const CpxSurveyCards: FunctionComponent<IProps> = ({
   texts
 }) =>
 {
-  const relevantSurveys = surveys.slice(0, 4);
+  const relevantSurveys = surveys.slice(0, 10);
 
   if(!surveys || surveys.length === 0 || !texts)
   {
@@ -38,15 +38,22 @@ export const CpxSurveyCards: FunctionComponent<IProps> = ({
 
   return (
     <View style={styles.wrapper}>
-      <View style={styles.cardsWrapper}>
-        {relevantSurveys.map(survey =>
+      <ScrollView horizontal style={styles.cardsWrapper}>
+        {relevantSurveys.map((survey, index) =>
         {
           const stars = survey.statistics_rating_avg || 0;
           const disabledStars = 5 - stars;
           const accentColor = config?.accentColor || "#43eadc";
 
           return (
-            <View style={[styles.card, { backgroundColor: config?.cardBackgroundColor || "white" }]} key={survey.id}>
+            <View
+              style={[
+                styles.card,
+                { backgroundColor: config?.cardBackgroundColor || "white" },
+                index === 0 ? { marginLeft: 12 } : { },
+                index === relevantSurveys.length - 1 ? { marginRight: 12 } : { }
+              ]}
+              key={survey.id}>
               <Text style={[styles.payout, { color: accentColor }]}>{survey.payout}</Text>
               <Text style={[styles.currency, { color: accentColor }]}>{survey.payout === 1 ? texts.currencySingular : texts.currencyPlural}</Text>
               <View style={styles.timeNeededWrapper}>
@@ -56,16 +63,16 @@ export const CpxSurveyCards: FunctionComponent<IProps> = ({
                 </Text>
               </View>
               <View style={styles.starsWrapper}>
-                {[...Array(stars)].map((_, index) => (
+                {[...Array(stars)].map((_, index2) => (
                   <Image
-                    key={index}
+                    key={index2}
                     style={[styles.star, { tintColor: config?.starColor || "#ffc400" }]}
                     source={starIcon}
                   />
                 ))}
-                {[...Array(disabledStars)].map((_, index) => (
+                {[...Array(disabledStars)].map((_, index2) => (
                   <Image
-                    key={index}
+                    key={"2-" + index2}
                     style={[styles.star, { tintColor: config?.inactiveStarColor || "#dfdfdfff" }]}
                     source={starIcon}
                   />
@@ -74,7 +81,7 @@ export const CpxSurveyCards: FunctionComponent<IProps> = ({
             </View>
           );
         })}
-      </View>
+      </ScrollView>
     </View>
   );
 };

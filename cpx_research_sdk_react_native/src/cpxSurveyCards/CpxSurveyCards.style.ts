@@ -9,7 +9,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderRadius: 10,
     flexDirection: "column",
-    height: 130,
+    height: 124,
     justifyContent: "center",
     marginHorizontal: 5,
     shadowColor: "#000",
@@ -19,11 +19,12 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.18,
     shadowRadius: 3,
-    width: 140,
+    width: 150,
   },
   cardsWrapper: {
-    alignItems: "center",
-    flexDirection: "row"
+    paddingBottom: 20,
+    paddingTop: 10,
+    width: "100%",
   },
   clockIcon: {
     height: clockIconSize,
@@ -67,7 +68,8 @@ const styles = StyleSheet.create({
   wrapper: {
     alignItems: "center",
     flexDirection: "row",
-    height: 150
+    height: 154,
+    width: "100%",
   }
 });
 
