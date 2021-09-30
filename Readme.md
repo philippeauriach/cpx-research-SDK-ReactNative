@@ -30,7 +30,22 @@ yarn add cpx-research-sdk-react-native
 npm install cpx-research-sdk-react-native
 ```
 
-2. Now import the package in your JavaScript files and use it like any other React Component.
+2. Since the CPX Research SDK uses the react-native-webview with native code functionality, you need to install this package as well.
+``` 
+yarn add react-native-webview
+
+# or
+
+npm install react-native-webview
+```
+
+3. Automatically install the react-native-webview pods
+``` 
+cd ios
+pod install
+```
+
+5. Now import the package in your JavaScript files and use it like any other React Component.
 ```javascript
 import CpxResearch from "cpx-research-sdk-react-native";
 ```
