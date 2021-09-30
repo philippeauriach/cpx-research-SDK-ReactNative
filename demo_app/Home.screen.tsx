@@ -1,6 +1,5 @@
 import { StackScreenProps } from "@react-navigation/stack";
-import CpxResearch from "cpx-research-sdk-react-native/src";
-import { CpxSurveyCards } from "cpx-research-sdk-react-native/src/cpxSurveyCards/CpxSurveyCards";
+import CpxResearch, { CpxSurveyCards } from "cpx-research-sdk-react-native/src";
 import { emptyTexts, ITexts } from "cpx-research-sdk-react-native/src/utils/store";
 import React, { FunctionComponent, useRef, useState } from "react";
 import {
@@ -60,11 +59,11 @@ const HomeScreen: FunctionComponent<StackScreenProps<any>> = ({ navigation }) =>
           backgroundColor: "#ff9800",
           height: 240,
           position: "left",
-          roundedCorners: 10,
+          roundedCorners: 20,
           text: "Click me",
           textColor: "#ffffff",
           textSize: 12,
-          width: 60,
+          width: 40,
         }}
       />
       <SafeAreaView style={styles.appWrapper}>

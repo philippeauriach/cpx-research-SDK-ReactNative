@@ -230,6 +230,68 @@ export default HomeScreen;
 
 **Note**: For a typescript example have a look at the demo app in the demo_app sub folder
 
+## Using the SurveyCards Widget
+The CPXSurveyCards Widget can be configured as follows:
+```jsx
+import { CpxSurveyCards } from "cpx-research-sdk-react-native";
+
+<CpxSurveyCards
+    surveys={surveys}
+    texts={texts}
+    config={{
+      accentColor: "#41d7e5",
+      cardBackgroundColor: "white",
+      inactiveStarColor: "#dfdfdfff",
+      starColor: "#ffc400",
+      textColor: "black"
+    }}
+    openWebView={openWebViewRef.current}
+/>
+```
+For the surveys, texts and the openWebView function props we need to use the features described in the 
+[Getting Started (Expert)](#getting-started-(expert)) section. 
+
+1) Assign the openWebView with the bindOpenWebView callback function provided by 
+the main CPXResearch component as show in the [Getting Started (Expert)](#getting-started-(expert)) section and simply pass the openWebViewRef.current 
+as a prop to the CpxSurveyCards.
+2) For the surveys and texts, use a local state (or any state management pattern of your choice) to store them in your application state.
+Then simply use to onSurveysUpdate and onTextsUpdate callback functions to get the texts and survey and store them in your application state.
+Now you can pass them to the CpxSurveyCards as well.
+
+Below you can see an example implementation (note that only the relevant lines of code for the CpxSurveyCards are shown):
+
+```jsx
+const YourApp = () =>
+{
+  const openWebViewRef = useRef();
+
+  const [surveys, setSurveys] = useState([]);
+  const [texts, setTexts] = useState();
+
+  return (
+    <>
+      <CpxResearch
+        /* ... */
+        onSurveysUpdate={surveys => setSurveys(surveys)}
+        onTextsUpdate={texts => setTexts(texts)}
+        bindOpenWebView={openWebView => openWebViewRef.current = openWebView}
+        /* ... */
+      />
+      <View>
+        /* ... */
+        <CpxSurveyCards
+          surveys={surveys}
+          texts={texts}
+          config={/* configure as shown above */}
+          openWebView={openWebViewRef.current}
+        />
+        /* ... */
+      </View>
+    </>
+  );
+};
+```
+
 
 # For Developers
 Before developing, run `yarn prepareDevelopment` from the root folder. 

@@ -4,6 +4,7 @@ import { AppState, AppStateStatus } from "react-native";
 import { fetchSurveysAndTransactions, getWidgetImages, markTransactionAsPaid } from "./actions/apiActions";
 import { setCpxState, setNotificationWidgetHiding } from "./actions/applicationActions";
 import { Container } from "./components/container/Container";
+import { CpxSurveyCards } from "./cpxSurveyCards/CpxSurveyCards";
 import { throwErrorIfColorStringsAreNoHexColor } from "./utils/helpers";
 import { createStore, ICpxConfig, IStore, StoreContext } from "./utils/store";
 
@@ -195,3 +196,4 @@ class CpxResearch extends React.Component<ICpxConfig, IStore>
 }
 
 export default CpxResearch;
+export { CpxSurveyCards };
