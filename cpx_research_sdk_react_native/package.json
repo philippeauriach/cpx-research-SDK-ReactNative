@@ -1,12 +1,13 @@
 {
   "name": "cpx-research-sdk-react-native",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "CPX Research SDK React Native",
   "main": "lib/index.js",
   "files": [
     "lib/*",
     "assets/*",
-    "Readme.md"
+    "Readme.md",
+    "preview.png"
   ],
   "scripts": {
     "build": "tsc",
