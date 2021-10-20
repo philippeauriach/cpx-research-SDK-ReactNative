@@ -47,6 +47,7 @@ export interface ICpxConfig
   onSurveysUpdate?: (surveys: any[]) => void;
   onTextsUpdate?: (texts: ITexts) => void;
   onTransactionsUpdate?: (transactions: any[]) => void;
+  onWebViewWasClosed?: () => void;
   sidebarWidget?: ISidebarWidgetStyle & IWidgetConfig;
   userId: string;
 }

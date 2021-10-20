@@ -31,6 +31,7 @@ const HomeScreen: FunctionComponent<StackScreenProps<any>> = ({ navigation }) =>
         onSurveysUpdate={surveys => setSurveys(surveys)}
         onTextsUpdate={texts => setTexts(texts)}
         onTransactionsUpdate={(transactions) => console.log("onSurveysUpdate Callback", transactions)}
+        onWebViewWasClosed={() => { /* do something */ }}
         bindMarkTransactionAsPaid={markTransactionAsPaid => markTransactionAsPaidRef.current = markTransactionAsPaid}
         bindFetchSurveysAndTransactions={fetchSurveysAndTransactions => fetchSurveysAndTransactionsRef.current = fetchSurveysAndTransactions}
         bindOpenWebView={openWebView => openWebViewRef.current = openWebView}

@@ -180,7 +180,7 @@ const App = () => (
 ```
 
 ## Getting Started (Expert)
-As stated above, it is possible to not pass any configuration for the corner, sidebar or notification widgets, which then means none of them will be display.
+As stated above, it is possible to not pass any configuration for the corner, sidebar or notification widgets, which then means none of them will be displayed.
 This might be especially useful if you want to build your own widgets/components. 
 For this use-case, the SDK provides multiple callbacks/methods where you can get the required data:
 
@@ -209,6 +209,11 @@ const HomeScreen = () =>
     console.log("onSurveysUpdate Callback", transactions);
   };
 
+  const onWebViewWasClosed = () =>
+  {
+    console.log("onWebViewWasClosed Callback");
+  };
+
   return (
     <>
       <CpxResearch
@@ -216,6 +221,7 @@ const HomeScreen = () =>
         // add the callback methods:
         onSurveysUpdate={onSurveysUpdate}  // will be called when the surveys updated
         onTransactionsUpdate={onTransactionsUpdate}  // will be called when the transactions updated
+        onWebViewWasClosed={onWebViewWasClosed}  // will be called when the user closed the webView
         // bind the refs:
         bindMarkTransactionAsPaid={markTransactionAsPaid => markTransactionAsPaidRef.current = markTransactionAsPaid}
         bindFetchSurveysAndTransactions={fetchSurveysAndTransactions => fetchSurveysAndTransactionsRef.current = fetchSurveysAndTransactions}

@@ -43,7 +43,7 @@ class CpxResearch extends React.Component<ICpxConfig, IStore>
   {
     this.fetchSurveysAndTransactionsInterval = setInterval(
       async () => fetchSurveysAndTransactions(this.state),
-      10000 // TODO: Change to 120000
+      120 * 1000 // 120 Seconds
     );
   };
 
@@ -112,6 +112,16 @@ class CpxResearch extends React.Component<ICpxConfig, IStore>
     }
   }
 
+  private onWebViewWasClosed(): void
+  {
+    console.log("webView was closed");
+
+    if(this.props.onWebViewWasClosed)
+    {
+      this.props.onWebViewWasClosed();
+    }
+  }
+
   private onTransactionsUpdate(): void
   {
     console.log("transactions changed! " + this.state.transactions?.length + " transactions available");
@@ -143,6 +153,12 @@ class CpxResearch extends React.Component<ICpxConfig, IStore>
 
   public componentDidUpdate(_prevProps: Readonly<ICpxConfig>, prevState: Readonly<IStore>): void
   {
+    if((prevState.cpxState === "webViewSingleSurvey" || prevState.cpxState === "webView") &&
+      (this.state.cpxState !== "webView" && this.state.cpxState !== "webViewSingleSurvey"))
+    {
+      this.onWebViewWasClosed();
+    }
+
     if(JSON.stringify(prevState.surveys) !== JSON.stringify(this.state.surveys))
     {
       this.onSurveysUpdate();
