@@ -17,7 +17,7 @@ This SDK is owned by [MakeOpinion GmbH](http://www.makeopinion.com).
 - [For Developers](#for-developers)
 
 # Preview
-![Preview](preview.png "Preview")
+![Preview](https://raw.githubusercontent.com/MakeOpinionGmbH/cpx-research-SDK-ReactNative/main/preview.png "Preview")
 
 # Installation
 
