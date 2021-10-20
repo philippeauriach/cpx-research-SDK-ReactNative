@@ -1,8 +1,12 @@
 {
   "name": "cpx-research-sdk-react-native",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "description": "CPX Research SDK React Native",
   "main": "lib/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MakeOpinionGmbH/cpx-research-SDK-ReactNative"
+  },
   "files": [
     "lib/*",
     "assets/*",

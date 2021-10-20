@@ -103,7 +103,7 @@ To display the CPXResearch Widget only in specific views, simply add it inside t
 The CPX Widget will take the available space.
 
 Here is an example using React Navigation, where the CPX Widget is only displayed on the Home Page 
-(for further details please have a look at the demo app in the demo_app sub folder. There you will find this exact example).
+(for further details please have a look at the demo app in the demo_app sub folder on GitHub. There you will find this exact example).
 ```jsx
 // App.jsx
 
