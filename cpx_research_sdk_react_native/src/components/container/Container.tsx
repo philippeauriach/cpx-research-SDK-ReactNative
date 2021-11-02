@@ -6,7 +6,7 @@ import { IStore, StoreContext } from "../../utils/store";
 import { CornerWidget } from "../cornerWidget/CornerWidget";
 import { NotificationWidget } from "../notificationWidget/NotificationWidget";
 import { SidebarWidget } from "../sidebarWidget/SidebarWidget";
-import { Webview } from "../webview/Webview";
+import { WebviewWrapper } from "../webviewWrapper/WebviewWrapper";
 import styles from "./Container.style";
 
 export const Container: FunctionComponent = () =>
@@ -58,7 +58,7 @@ export const Container: FunctionComponent = () =>
             )}
           </>
         )}
-        {isWebViewActive && <Webview/>}
+        {isWebViewActive && <WebviewWrapper/>}
       </View>
     </SafeAreaView>
   );

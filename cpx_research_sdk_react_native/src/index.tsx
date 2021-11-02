@@ -78,6 +78,13 @@ class CpxResearch extends React.Component<ICpxConfig, IStore>
       this.props.onSurveysUpdate(this.state.surveys);
     }
 
+    if(this.state.cpxState === "webView")
+    {
+      // if the user currently uses the webView, do nothing
+      console.log("user currently uses the webView");
+      return;
+    }
+
     if(this.state.surveys?.length > 0)
     {
       if(this.state.cpxState === "hidden")

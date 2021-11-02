@@ -24,9 +24,9 @@ export const fetchSurveysAndTransactions = async (store: IStore): Promise<void> 
     hasAnErrorOccurred = true;
   }
 
-  if(response.data.error_code)
+  if(response.data?.error_code)
   {
-    console.log("an error occurred while fetching surveys and transactions: ", response.data.error_message);
+    console.log("an error occurred while fetching surveys and transactions: ", response.data?.error_message);
     hasAnErrorOccurred = true;
   }
 
@@ -44,11 +44,23 @@ export const fetchSurveysAndTransactions = async (store: IStore): Promise<void> 
     return;
   }
 
-  console.log(`fetched ${response.data.count_available_surveys} surveys and ${response.data.transactions.length} transactions successfully`);
+  if(!response.data)
+  {
+    console.log("no data returned from the api");
+    return;
+  }
+
+  if(!response.data.surveys)
+  {
+    console.log("no surveys returned from the api");
+    return;
+  }
+
+  console.log(`fetched ${response.data?.count_available_surveys} surveys and ${response.data?.transactions?.length} transactions successfully`);
 
   storeCopy.surveys = response.data.surveys;
   storeCopy.singleSurveyIdForWebView = response.data.surveys?.[0]?.id;
-  storeCopy.transactions = response.data.transactions;
+  storeCopy.transactions = response.data.transactions || [];
   storeCopy.texts = {
     currencyPlural: response.data.text?.currency_name_plural,
     currencySingular: response.data.text?.currency_name_singular,

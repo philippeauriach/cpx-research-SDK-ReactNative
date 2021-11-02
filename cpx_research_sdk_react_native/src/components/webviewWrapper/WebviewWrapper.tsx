@@ -6,12 +6,13 @@ import {
 // @ts-ignore
 import ProgressBar from "react-native-progress/Bar";
 // @ts-ignore
-import { WebView, WebViewProps } from "react-native-webview";
+import { WebViewProps } from "react-native-webview";
 
 import { setCpxState } from "../../actions/applicationActions";
 import { endpoints, urls } from "../../utils/globals";
 import { buildQueryString, getRequestParams } from "../../utils/helpers";
 import { IStore, StoreContext } from "../../utils/store";
+import WebView from "./WebView";
 import styles, { progressBarHeight } from "./Webview.style";
 import { WebviewIcon } from "./webviewIcon/WebviewIcon";
 import webviewIconStyles from "./webviewIcon/WebviewIcon.style";
@@ -28,7 +29,7 @@ interface ITabs
   settings: string;
 }
 
-export const Webview: FunctionComponent = () =>
+export const WebviewWrapper: FunctionComponent = () =>
 {
   const store = useContext<IStore>(StoreContext);
 
@@ -53,12 +54,6 @@ export const Webview: FunctionComponent = () =>
   const [activeTab, setActiveTab] = useState<keyof typeof tabs>("home");
   const [isLoading, setIsLoading] = useState(false);
   const [webViewContainerWidth, setWebViewContainerWidth] = useState<number | undefined>();
-
-  const webviewProps: WebViewProps = {
-    onLoadEnd: () => setIsLoading(false),
-    onLoadStart: () => setIsLoading(true),
-    source: { uri: tabs[activeTab] },
-  };
 
   return (
     <View style={styles.container}>
@@ -111,7 +106,12 @@ export const Webview: FunctionComponent = () =>
             </View>
           </>
         )}
-        <WebView { ...webviewProps } />
+        <WebView
+          activeTab={activeTab}
+          currentUrl={tabs[activeTab]}
+          onLoadEnd={() => setIsLoading(false)}
+          onLoadStart={() => setIsLoading(true)}
+        />
       </View>
     </View>
   );
