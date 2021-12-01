@@ -1,7 +1,14 @@
+// @ts-ignore
+import axios from "axios";
 // eslint-disable-next-line import/no-extraneous-dependencies
 import React, { Component, ReactElement } from "react";
 // @ts-ignore
 import { WebView as ReactNativeWebView } from "react-native-webview";
+
+import { setCpxState } from "../../actions/applicationActions";
+import { endpoints, urls } from "../../utils/globals";
+import { getRequestParams } from "../../utils/helpers";
+import { StoreContext } from "../../utils/store";
 
 interface IProps
 {
@@ -21,12 +28,36 @@ class WebView extends Component<IProps>
   public render(): ReactElement
   {
     return (
-      <ReactNativeWebView
-        {...this.props}
-        source={{
-          uri: this.props.currentUrl
-        }}
-      />
+      <StoreContext.Consumer>
+        {store => (
+          <ReactNativeWebView
+            {...this.props}
+            renderError={async (errorDomain: string | undefined, errorCode: number, errorDesc: string) =>
+            {
+              alert("An error occurred: " + errorDesc);
+              setCpxState("widgets", store);
+              console.log("[renderError] ", errorDomain, errorCode, errorDesc);
+
+              try
+              {
+                await axios.get(urls.baseUrl + endpoints.homeEndpoint, {
+                  params: {
+                    ...getRequestParams(store),
+                    webViewErrorCode: errorCode,
+                    webViewErrorDescription: errorDesc,
+                    webViewErrorDomain: errorDomain
+                  }
+                });
+              }
+              catch (e)
+              {
+                console.log("an error occurred while logging the webViewError", e);
+              }
+            }}
+            source={{ uri: this.props.currentUrl }}
+          />
+        )}
+      </StoreContext.Consumer>
     );
   }
 }

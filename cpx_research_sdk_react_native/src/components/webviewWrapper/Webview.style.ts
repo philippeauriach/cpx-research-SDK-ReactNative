@@ -8,14 +8,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: "48%",
   },
-  circularProgressIndicatorWrapper: {
-    height: "100%",
-    left: 0,
-    position: "absolute",
-    top: 0,
-    width: "100%",
-    zIndex: 1,
-  },
   container: {
 
     height: "100%",

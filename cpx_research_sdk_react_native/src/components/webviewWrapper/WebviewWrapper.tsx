@@ -97,13 +97,6 @@ export const WebviewWrapper: FunctionComponent = () =>
                 color={store.config.accentColor}
               />
             </View>
-            <View pointerEvents="box-none" style={styles.circularProgressIndicatorWrapper}>
-              <ActivityIndicator
-                style={styles.circularProgressIndicator}
-                size="large"
-                color={store.config.accentColor}
-              />
-            </View>
           </>
         )}
         <WebView
