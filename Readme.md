@@ -20,7 +20,8 @@ This SDK is owned by [MakeOpinion GmbH](http://www.makeopinion.com).
 ![Preview](preview.png "Preview")
 
 # Videotutorial
-Click the Image to view the video
+Click the Image to view the video  
+
 [![Watch a step by step tutorial](http://img.youtube.com/vi/7ogCbAuai6U/0.jpg)](http://www.youtube.com/watch?v=7ogCbAuai6U "cpx-research.com Tutorial React Native Integration - Monetize your App or Website")
 
 # Installation
