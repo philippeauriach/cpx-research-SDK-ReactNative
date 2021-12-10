@@ -19,6 +19,9 @@ This SDK is owned by [MakeOpinion GmbH](http://www.makeopinion.com).
 # Preview
 ![Preview](preview.png "Preview")
 
+# Videotutorial
+![Watch a step by step tutorial](https://www.youtube.com/watch?v=7ogCbAuai6U)
+
 # Installation
 
 1. Install the SDK like any other npm package, using yarn or npm
