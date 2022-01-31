@@ -26,7 +26,7 @@ const HomeScreen: FunctionComponent<StackScreenProps<any>> = ({ navigation }) =>
     <>
       <CpxResearch
         accentColor="#ff9800"
-        appId="1"
+        appId="10"
         userId="2"
         onSurveysUpdate={surveys => setSurveys(surveys)}
         onTextsUpdate={texts => setTexts(texts)}

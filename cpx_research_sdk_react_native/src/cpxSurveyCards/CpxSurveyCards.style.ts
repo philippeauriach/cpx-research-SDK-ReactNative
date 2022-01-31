@@ -2,7 +2,7 @@ import { StyleSheet } from "react-native";
 
 const clockIconSize = 16;
 const starIconSize = 19;
-const cardHeight = 114;
+const cardHeight = 118;
 const cardsWrapperPaddingBottom = 20;
 const cardsWrapperPaddingTop = 10;
 
@@ -36,20 +36,30 @@ const styles = StyleSheet.create({
     height: clockIconSize,
     marginRight: 5,
     resizeMode: "contain",
-    tintColor: "#3ed5c9",
     width: clockIconSize,
   },
   currency: {
-    color: "#3ed5c9",
     fontSize: 13,
     fontWeight: "700",
     marginBottom: 8,
     marginTop: -2,
   },
   payout: {
-    color: "#3ed5c9",
     fontSize: 20,
     fontWeight: "700"
+  },
+  payoutOriginal: {
+    fontSize: 14,
+    fontWeight: "400",
+    marginRight: 5,
+    textDecorationLine: "line-through",
+    textDecorationStyle: "solid"
+  },
+  payoutWrapper: {
+    alignItems: "center",
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "center"
   },
   star: {
     height: starIconSize,

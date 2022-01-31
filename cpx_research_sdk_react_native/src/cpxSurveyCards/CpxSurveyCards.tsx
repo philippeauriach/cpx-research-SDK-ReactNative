@@ -45,6 +45,7 @@ export const CpxSurveyCards: FunctionComponent<IProps> = ({
       <ScrollView horizontal style={styles.cardsWrapper}>
         {relevantSurveys.map((survey, index) =>
         {
+          const { payout, payout_original } = survey;
           const stars = survey.statistics_rating_avg || 0;
           const disabledStars = 5 - stars;
 
@@ -65,7 +66,16 @@ export const CpxSurveyCards: FunctionComponent<IProps> = ({
                 index === relevantSurveys.length - 1 ? { marginRight: 12 } : { }
               ]}
               key={survey.id}>
-              <Text style={[styles.payout, { color: accentColor }]}>{survey.payout}</Text>
+              <View style={styles.payoutWrapper}>
+                {payout_original && (
+                  <Text style={[styles.payoutOriginal, { color: "black" }]}>
+                    {payout_original}
+                  </Text>
+                )}
+                <Text style={[styles.payout, { color: payout_original ? "red" : accentColor }]}>
+                  {payout}
+                </Text>
+              </View>
               <Text style={[styles.currency, { color: accentColor }]}>{survey.payout === 1 ? texts.currencySingular : texts.currencyPlural}</Text>
               <View style={styles.timeNeededWrapper}>
                 <Image style={[styles.clockIcon, { tintColor: accentColor }]} source={clockIcon}/>
