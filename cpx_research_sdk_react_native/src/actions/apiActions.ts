@@ -24,7 +24,12 @@ export const fetchSurveysAndTransactions = async (store: IStore): Promise<void> 
     hasAnErrorOccurred = true;
   }
 
-  if(response.data?.error_code)
+  if(!hasAnErrorOccurred && response == null)
+  {
+    console.log("an error occurred while fetching surveys and transactions: empty response");
+    hasAnErrorOccurred = true;
+  }
+  else if(!hasAnErrorOccurred && response?.data?.error_code)
   {
     console.log("an error occurred while fetching surveys and transactions: ", response.data?.error_message);
     hasAnErrorOccurred = true;

@@ -5,6 +5,8 @@
   "license": "UNLICENSED",
   "scripts": {
     "android": "react-native run-android",
+    "buildReleaseApk": "cd android && ./gradlew assembleRelease --warning-mode all && cd ..",
+    "installReleaseApk": "adb install android/app/build/outputs/apk/release/app-release.apk",
     "ios": "react-native run-ios",
     "start": "react-native start",
     "test": "jest",
