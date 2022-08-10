@@ -81,7 +81,7 @@ class WebView extends Component<IProps, IState>
 
   public render(): ReactElement
   {
-    if(this.state.hasError) 
+    if(this.state.hasError)
     {
       return <Text>Something went wrong.</Text>;
     }

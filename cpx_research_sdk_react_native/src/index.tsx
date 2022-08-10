@@ -42,7 +42,15 @@ class CpxResearch extends React.Component<ICpxConfig, IStore>
   private startFetchInterval = (): void =>
   {
     this.fetchSurveysAndTransactionsInterval = setInterval(
-      async () => fetchSurveysAndTransactions(this.state),
+      async () =>
+      {
+        if(this.state.cpxState === "webView" || this.state.cpxState === "webViewSingleSurvey")
+        {
+          return;
+        }
+
+        return fetchSurveysAndTransactions(this.state);
+      },
       120 * 1000 // 120 Seconds
     );
   };
@@ -78,10 +86,10 @@ class CpxResearch extends React.Component<ICpxConfig, IStore>
       this.props.onSurveysUpdate(this.state.surveys);
     }
 
-    if(this.state.cpxState === "webView")
+    if(this.state.cpxState === "webView" || this.state.cpxState === "webViewSingleSurvey")
     {
       // if the user currently uses the webView, do nothing
-      console.log("user currently uses the webView");
+      console.log("user currently uses the webView. return");
       return;
     }
 
@@ -119,11 +127,13 @@ class CpxResearch extends React.Component<ICpxConfig, IStore>
     }
   }
 
-  private onWebViewWasClosed(): void
+  private async onWebViewWasClosed(): Promise<void>
   {
     console.log("webView was closed");
 
-    if(this.props.onWebViewWasClosed)
+    await fetchSurveysAndTransactions(this.state);
+
+    if(this.props.onWebViewWasClosed) 
     {
       this.props.onWebViewWasClosed();
     }
@@ -163,7 +173,7 @@ class CpxResearch extends React.Component<ICpxConfig, IStore>
     if((prevState.cpxState === "webViewSingleSurvey" || prevState.cpxState === "webView") &&
       (this.state.cpxState !== "webView" && this.state.cpxState !== "webViewSingleSurvey"))
     {
-      this.onWebViewWasClosed();
+      void this.onWebViewWasClosed();
     }
 
     if(JSON.stringify(prevState.surveys) !== JSON.stringify(this.state.surveys))
