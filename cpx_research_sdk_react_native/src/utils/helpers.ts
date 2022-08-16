@@ -1,4 +1,6 @@
-import { IStore } from "./store";
+import deepEqual from "deep-equal";
+
+import { IAppContext, IAppStore } from "../context/context";
 
 const { version } = require("../../package.json");
 
@@ -10,9 +12,9 @@ interface IRequestParams
   skdVersion: string;
 }
 
-export const getRequestParams = (store: IStore): IRequestParams => ({
-  app_id: store.config.appId,
-  ext_user_id: store.config.userId,
+export const getRequestParams = ({ config }: IAppStore): IRequestParams => ({
+  app_id: config.appId,
+  ext_user_id: config.userId,
   sdk: "react-native",
   skdVersion: version
 });
@@ -42,3 +44,5 @@ export const buildQueryString = (params: Record<string, any>): string =>
 
   return "?" + queryString;
 };
+
+export const deepPropsComparison = (prevProps: Record<string, any>, nextProps: Record<string, any>): boolean => deepEqual(prevProps, nextProps);

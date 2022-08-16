@@ -1,50 +1,30 @@
-import React from "react";
+import React, { FunctionComponent, useEffect, useMemo, useRef } from "react";
 import { AppState, AppStateStatus } from "react-native";
+import { useImmerReducer } from "use-immer";
 
 import { fetchSurveysAndTransactions, getWidgetImages, markTransactionAsPaid } from "./actions/apiActions";
-import { setCpxState, setNotificationWidgetHiding } from "./actions/applicationActions";
 import { Container } from "./components/container/Container";
+import { IAppContext, ICpxConfig, initialAppStore } from "./context/context";
+import appReducer from "./context/reducer";
 import { CpxSurveyCards } from "./cpxSurveyCards/CpxSurveyCards";
-import { throwErrorIfColorStringsAreNoHexColor } from "./utils/helpers";
-import { createStore, ICpxConfig, IStore, StoreContext } from "./utils/store";
+import { deepPropsComparison, throwErrorIfColorStringsAreNoHexColor } from "./utils/helpers";
 
-class CpxResearch extends React.Component<ICpxConfig, IStore>
+const CpxResearch2: FunctionComponent<ICpxConfig> = (props) =>
 {
-  private fetchSurveysAndTransactionsInterval: NodeJS.Timer | undefined;
+  const fetchSurveysAndTransactionsIntervalRef = useRef<NodeJS.Timer>();
+  const [appContext, appDispatch] = useImmerReducer(appReducer, initialAppStore);
 
-  public constructor(props: ICpxConfig)
+  const memoizedAppContext = useMemo<IAppContext>(
+    () => ({ appContext, appDispatch }),
+    [appContext, appDispatch]
+  );
+
+  const startFetchInterval = (): void =>
   {
-    super(props);
-
-    throwErrorIfColorStringsAreNoHexColor([
-      props.cornerWidget?.backgroundColor,
-      props.cornerWidget?.textColor,
-      props.sidebarWidget?.backgroundColor,
-      props.sidebarWidget?.textColor,
-      props.notificationWidget?.backgroundColor,
-      props.notificationWidget?.textColor
-    ]);
-
-    this.markTransactionAsPaid = this.markTransactionAsPaid.bind(this);
-    this.fetchSurveysAndTransactions = this.fetchSurveysAndTransactions.bind(this);
-    this.openWebView = this.openWebView.bind(this);
-
-    const store = createStore(props);
-
-    store.subscribers.push((updatedStore: IStore) =>
-    {
-      this.setState(updatedStore);
-    });
-
-    this.state = store;
-  }
-
-  private startFetchInterval = (): void =>
-  {
-    this.fetchSurveysAndTransactionsInterval = setInterval(
+    fetchSurveysAndTransactionsIntervalRef.current = setInterval(
       async () =>
       {
-        if(this.state.cpxState === "webView" || this.state.cpxState === "webViewSingleSurvey")
+        if(appContext.cpxState === "webView" || appContext.cpxState === "webViewSingleSurvey")
         {
           return;
         }
@@ -55,13 +35,41 @@ class CpxResearch extends React.Component<ICpxConfig, IStore>
     );
   };
 
-  private stopFetchInterval = (): void =>
+  const stopFetchInterval = (): void =>
   {
-    if(this.fetchSurveysAndTransactionsInterval)
+    if(fetchSurveysAndTransactionsIntervalRef.current)
     {
-      clearInterval(this.fetchSurveysAndTransactionsInterval);
+      clearInterval(fetchSurveysAndTransactionsIntervalRef.current);
     }
   };
+
+  useEffect(() =>
+  {
+    throwErrorIfColorStringsAreNoHexColor([
+      props.cornerWidget?.backgroundColor,
+      props.cornerWidget?.textColor,
+      props.sidebarWidget?.backgroundColor,
+      props.sidebarWidget?.textColor,
+      props.notificationWidget?.backgroundColor,
+      props.notificationWidget?.textColor
+    ]);
+  }, [props.cornerWidget, props.notificationWidget, props.sidebarWidget]);
+
+  if(props.isHidden)
+  {
+    return null;
+  }
+
+  return (
+    <AppStoreContext.Provider value={memoizedAppContext}>
+      <Container/>
+    </AppStoreContext.Provider>
+  );
+};
+
+class CpxResearch extends React.Component<ICpxConfig, IStore>
+{
+  private fetchSurveysAndTransactionsInterval: NodeJS.Timer | undefined;
 
   private handleAppStateChange = (appState: AppStateStatus): void =>
   {
@@ -168,16 +176,35 @@ class CpxResearch extends React.Component<ICpxConfig, IStore>
     await fetchSurveysAndTransactions(this.state);
   }
 
+  public shouldComponentUpdate(nextProps: Readonly<ICpxConfig>, nextState: Readonly<IStore>): boolean
+  {
+    console.log("shouldComponentUpdate");
+
+    const didPropsChange = !deepPropsComparison(this.props, nextProps);
+    const didStateChange = !deepPropsComparison(this.state, nextState);
+
+    console.log("didPropsChange: " + didPropsChange.valueOf());
+    console.log("didStateChange: " + didStateChange.valueOf());
+
+    return didPropsChange || didStateChange;
+  }
+
   public componentDidUpdate(_prevProps: Readonly<ICpxConfig>, prevState: Readonly<IStore>): void
   {
+    console.log("[componentDidUpdate]");
+
     if((prevState.cpxState === "webViewSingleSurvey" || prevState.cpxState === "webView") &&
       (this.state.cpxState !== "webView" && this.state.cpxState !== "webViewSingleSurvey"))
     {
+      console.log("call onWebViewWasClosed.");
+      console.log("prev: " + prevState.cpxState);
+      console.log("now: " + this.state.cpxState);
       void this.onWebViewWasClosed();
     }
 
     if(JSON.stringify(prevState.surveys) !== JSON.stringify(this.state.surveys))
     {
+      console.log("call onSurveysUpdate");
       this.onSurveysUpdate();
     }
 
@@ -194,6 +221,8 @@ class CpxResearch extends React.Component<ICpxConfig, IStore>
 
   public async componentDidMount(): Promise<void>
   {
+    console.log("componentDidMount");
+
     this.props.bindMarkTransactionAsPaid?.(this.markTransactionAsPaid);
     this.props.bindFetchSurveysAndTransactions?.(this.fetchSurveysAndTransactions);
     this.props.bindOpenWebView?.(this.openWebView);
@@ -221,9 +250,9 @@ class CpxResearch extends React.Component<ICpxConfig, IStore>
     }
 
     return (
-      <StoreContext.Provider value={this.state}>
+      <AppStoreContext.Provider value={memoizedAppContext}>
         <Container/>
-      </StoreContext.Provider>
+      </AppStoreContext.Provider>
     );
   }
 }
