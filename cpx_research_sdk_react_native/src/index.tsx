@@ -26,7 +26,7 @@ let CpxResearch: FunctionComponent<ICpxConfig> = config =>
     onWebViewWasClosed: onWebViewWasClosedCallback,
   } = config;
 
-  const fetchSurveysAndTransactionsIntervalRef = useRef<NodeJS.Timer>();
+  const fetchIntervalRef = useRef<NodeJS.Timer>();
   const [appContext, appDispatch] = useImmerReducer(appReducer, getInitialAppStore(config));
 
   const memoizedAppContext = useMemo<IAppContext>(
@@ -87,30 +87,30 @@ let CpxResearch: FunctionComponent<ICpxConfig> = config =>
     });
   }, [requestParams, appDispatch]);
 
+  const stopFetchInterval = (): void =>
+  {
+    if(fetchIntervalRef.current)
+    {
+      console.log("clear existing fetch interval");
+      clearInterval(fetchIntervalRef.current);
+    }
+  };
+
   const startFetchInterval = useCallback((): void =>
   {
-    if(fetchSurveysAndTransactionsIntervalRef.current)
-    {
-      return;
-    }
+    console.log("startFetchInterval");
 
-    fetchSurveysAndTransactionsIntervalRef.current = setInterval(
+    stopFetchInterval();
+
+    fetchIntervalRef.current = setInterval(
       async () =>
       {
-        console.log("interval");
+        console.log("fetch interval");
         return fetchSurveysAndTransactions();
       },
       5 * 1000 // 120 Seconds
     );
   }, [fetchSurveysAndTransactions]);
-
-  const stopFetchInterval = (): void =>
-  {
-    if(fetchSurveysAndTransactionsIntervalRef.current)
-    {
-      clearInterval(fetchSurveysAndTransactionsIntervalRef.current);
-    }
-  };
 
   const handleAppStateChange = useCallback((appState: AppStateStatus): void =>
   {
@@ -229,8 +229,6 @@ let CpxResearch: FunctionComponent<ICpxConfig> = config =>
 
   useEffect(() =>
   {
-    console.log("[useEffect 1]");
-
     bindMarkTransactionAsPaid?.(markTransactionAsPaid);
     bindFetchSurveysAndTransactions?.(fetchSurveysAndTransactions);
     bindOpenWebView?.(openWebView);
@@ -245,30 +243,21 @@ let CpxResearch: FunctionComponent<ICpxConfig> = config =>
 
   useEffect(() =>
   {
-    console.log("[useEffect 2]");
-
     void fetchSurveysAndTransactions();
   }, [fetchSurveysAndTransactions]);
 
   useEffect(() =>
   {
-    console.log("[useEffect 3]");
-
     appDispatch({ actionType: "getWidgetImages" });
   }, [appDispatch]);
 
   useEffect(() =>
   {
-    console.log("[useEffect 4]");
-
     startFetchInterval();
-
   }, [startFetchInterval]);
 
   useEffect(() =>
   {
-    console.log("[useEffect 5]");
-
     AppState.addEventListener("change", handleAppStateChange);
 
     return () =>
@@ -283,18 +272,21 @@ let CpxResearch: FunctionComponent<ICpxConfig> = config =>
     if((previousCpxState === "webViewSingleSurvey" || previousCpxState === "webView") &&
       (cpxState !== "webView" && cpxState !== "webViewSingleSurvey"))
     {
-      console.log("call onWebViewWasClosed.");
-      console.log("prev: " + previousCpxState);
-      console.log("now: " + cpxState);
       void onWebViewWasClosed();
+      startFetchInterval();
     }
-  }, [cpxState, onWebViewWasClosed, previousCpxState]);
+    else if((previousCpxState !== "webView" && previousCpxState !== "webViewSingleSurvey") &&
+      (cpxState === "webView" || cpxState === "webViewSingleSurvey"))
+    {
+      console.log("webview was opened");
+      stopFetchInterval();
+    }
+  }, [cpxState, onWebViewWasClosed, previousCpxState, startFetchInterval]);
 
   useEffect(() =>
   {
     if(JSON.stringify(previousSurveys) !== JSON.stringify(surveys))
     {
-      console.log("call onSurveysUpdate");
       onSurveysUpdate();
     }
   }, [onSurveysUpdate, previousSurveys, surveys]);
