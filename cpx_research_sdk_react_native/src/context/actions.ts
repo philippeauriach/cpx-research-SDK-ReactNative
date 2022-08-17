@@ -1,8 +1,16 @@
 import { buildWidgetImageUrl, getWidgetImageRequestParams } from "./actionHelpers";
 import {
-  ISetNotificationWidgetHiding, ISetCpxState
+  ISetNotificationWidgetHiding, ISetCpxState, IUpdateAppContext
 } from "./actionInterfaces";
 import { IAppStore } from "./context";
+
+export const updateAppContext = (state: IAppStore, payload: IUpdateAppContext["payload"]): void =>
+{
+  Object.keys(payload).forEach(key =>
+  {
+    state[key as keyof typeof state] = payload[key as keyof typeof payload];
+  });
+};
 
 export const setCpxState = (state: IAppStore, payload: ISetCpxState["payload"]): void =>
 {

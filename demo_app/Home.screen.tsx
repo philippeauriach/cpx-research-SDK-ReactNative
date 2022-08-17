@@ -1,6 +1,6 @@
 import { StackScreenProps } from "@react-navigation/stack";
 import CpxResearch, { CpxSurveyCards } from "cpx-research-sdk-react-native/src";
-import { emptyTexts, ITexts } from "cpx-research-sdk-react-native/src/utils/store";
+import { emptyTexts, ITexts } from "cpx-research-sdk-react-native/src/context/context";
 import React, { FunctionComponent, useRef, useState } from "react";
 import {
   SafeAreaView,

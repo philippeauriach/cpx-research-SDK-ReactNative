@@ -1,4 +1,4 @@
-import { TCpxState } from "./context";
+import { IAppStore, TCpxState } from "./context";
 
 export interface ISetCpxState
 {
@@ -19,4 +19,10 @@ export interface ISetNotificationWidgetHiding
 export interface IGetWidgetImages
 {
   actionType: "getWidgetImages";
+}
+
+export interface IUpdateAppContext
+{
+  actionType: "updateAppContext";
+  payload: Partial<IAppStore>;
 }

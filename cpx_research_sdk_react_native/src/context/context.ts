@@ -80,7 +80,7 @@ export const emptyTexts: ITexts = {
 
 export interface IAppStore
 {
-  config?: ICpxConfig;
+  config: ICpxConfig;
   cpxState: TCpxState;
   isNotificationWidgetHidden: boolean;
   singleSurveyIdForWebView?: any;
@@ -91,6 +91,11 @@ export interface IAppStore
 }
  
 export const initialAppStore: IAppStore = {
+  config: {
+    accentColor: "",
+    appId: "-1",
+    userId: "-1",
+  },
   cpxState: "hidden",
   isNotificationWidgetHidden: false,
   singleSurveyIdForWebView: undefined,
@@ -99,6 +104,11 @@ export const initialAppStore: IAppStore = {
   transactions: [],
   widgetImages: {},
 };
+
+export const getInitialAppStore = (config: ICpxConfig): IAppStore => ({
+  ...initialAppStore,
+  config
+});
 
 export interface IAppContext
 {

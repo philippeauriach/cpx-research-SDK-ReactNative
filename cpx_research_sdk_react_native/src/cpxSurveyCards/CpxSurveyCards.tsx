@@ -3,7 +3,7 @@ import {
   Image, ScrollView, Text, TouchableOpacity, View
 } from "react-native";
 
-import { ITexts } from "../utils/store";
+import { ITexts } from "../context/context";
 import styles from "./CpxSurveyCards.style";
 
 const clockIcon = require("../../assets/clock.png");

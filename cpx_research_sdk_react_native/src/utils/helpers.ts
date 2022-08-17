@@ -1,10 +1,8 @@
 import deepEqual from "deep-equal";
 
-import { IAppContext, IAppStore } from "../context/context";
-
 const { version } = require("../../package.json");
 
-interface IRequestParams
+export interface IRequestParams
 {
   app_id: string;
   ext_user_id: string;
@@ -12,9 +10,9 @@ interface IRequestParams
   skdVersion: string;
 }
 
-export const getRequestParams = ({ config }: IAppStore): IRequestParams => ({
-  app_id: config.appId,
-  ext_user_id: config.userId,
+export const getRequestParams = (appId: string, userId: string): IRequestParams => ({
+  app_id: appId,
+  ext_user_id: userId,
   sdk: "react-native",
   skdVersion: version
 });

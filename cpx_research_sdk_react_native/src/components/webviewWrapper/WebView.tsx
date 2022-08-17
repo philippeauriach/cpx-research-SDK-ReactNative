@@ -1,16 +1,11 @@
-// @ts-ignore
 import axios from "axios";
-// eslint-disable-next-line import/no-extraneous-dependencies
 import React, { Component, ErrorInfo, ReactElement } from "react";
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { Text } from "react-native";
-// @ts-ignore
 import { WebView as ReactNativeWebView } from "react-native-webview";
 
-import { setCpxState } from "../../actions/applicationActions";
+import AppStoreContext, { IAppContext } from "../../context/context";
 import { endpoints, urls } from "../../utils/globals";
 import { getRequestParams } from "../../utils/helpers";
-import { IStore, StoreContext } from "../../utils/store";
 
 interface IProps
 {
@@ -51,7 +46,7 @@ class WebView extends Component<IProps, IState>
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  private onError = async (store: IStore, nativeEvent: any, error?: string): Promise<void> =>
+  private onError = async (appStore: IAppContext, nativeEvent: any, error?: string): Promise<void> =>
   {
     if(error) 
     {
@@ -66,7 +61,7 @@ class WebView extends Component<IProps, IState>
     {
       await axios.get(urls.baseUrl + endpoints.homeEndpoint, {
         params: {
-          ...getRequestParams(store),
+          ...getRequestParams(appStore.appContext.config.appId, appStore.appContext.config.userId),
           webViewErrorEvent: nativeEvent,
         }
       });
@@ -76,7 +71,10 @@ class WebView extends Component<IProps, IState>
       console.log("an error occurred while logging the webViewError", e);
     }
 
-    setCpxState("widgets", store);
+    appStore.appDispatch({
+      actionType: "setCpxState",
+      payload: { state: "widgets" }
+    });
   };
 
   public render(): ReactElement
@@ -87,26 +85,26 @@ class WebView extends Component<IProps, IState>
     }
 
     return (
-      <StoreContext.Consumer>
-        {store => (
+      <AppStoreContext.Consumer>
+        {appStore => (
           <ReactNativeWebView
             {...this.props}
             onError={(syntheticEvent: any) =>
             {
               const { nativeEvent } = syntheticEvent;
               console.error("[WebView onError]: ", nativeEvent);
-              void this.onError(store, nativeEvent, nativeEvent.description);
+              void this.onError(appStore, nativeEvent, nativeEvent.description);
             }}
             onHttpError={(syntheticEvent: any) => 
             {
               const { nativeEvent } = syntheticEvent;
               console.error("[WebView onHttpError]: WebView received error: ", nativeEvent);
-              void this.onError(store, nativeEvent, nativeEvent.statusCode + " - " + nativeEvent.description);
+              void this.onError(appStore, nativeEvent, nativeEvent.statusCode + " - " + nativeEvent.description);
             }}
             source={{ uri: this.props.currentUrl }}
           />
         )}
-      </StoreContext.Consumer>
+      </AppStoreContext.Consumer>
     );
   }
 }

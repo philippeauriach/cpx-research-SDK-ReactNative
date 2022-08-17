@@ -3,8 +3,7 @@ import {
   View, Image, StyleProp, ViewStyle, TouchableWithoutFeedback, Text
 } from "react-native";
 
-import { setNotificationWidgetHiding } from "../../actions/applicationActions";
-import { IStore, StoreContext } from "../../utils/store";
+import AppStoreContext, { IAppContext } from "../../context/context";
 import { globalStyles } from "../../utils/styles";
 import styles from "./NotificationWidget.style";
 
@@ -21,9 +20,9 @@ export const NotificationWidget: FunctionComponent<IProps> = ({
   onPress
 }) =>
 {
-  const store = useContext<IStore>(StoreContext);
+  const { appContext, appDispatch } = useContext<IAppContext>(AppStoreContext);
 
-  if(!store.config.notificationWidget || !store.widgetImages.notification)
+  if(!appContext.config.notificationWidget || !appContext.widgetImages.notification)
   {
     return null;
   }
@@ -32,7 +31,7 @@ export const NotificationWidget: FunctionComponent<IProps> = ({
     height,
     textColor,
     width
-  } = store.config.notificationWidget;
+  } = appContext.config.notificationWidget;
 
   const renderedHeight = Math.min(height, (containerHeight || 0) * 0.25);
   const renderedWidth = Math.min(width, (containerWidth || 0) * 0.8);
@@ -43,7 +42,7 @@ export const NotificationWidget: FunctionComponent<IProps> = ({
     width: renderedWidth,
   };
 
-  switch (store.config.notificationWidget.position)
+  switch (appContext.config.notificationWidget.position)
   {
     case "top":
       containerStyle = {
@@ -62,13 +61,19 @@ export const NotificationWidget: FunctionComponent<IProps> = ({
   return (
     <TouchableWithoutFeedback onPress={onPress}>
       <View style={[globalStyles.widgetsShadow, styles.container, containerStyle]}>
-        <TouchableWithoutFeedback onPress={() => setNotificationWidgetHiding(true, store)}>
+        <TouchableWithoutFeedback onPress={() =>
+        {
+          appDispatch({
+            actionType: "setNotificationWidgetHiding",
+            payload: { isHidden: true }
+          });
+        }}>
           <View style={styles.closeIconContainer}>
             <Text style={[styles.closeIcon, { color: textColor }]}>&times;</Text>
           </View>
         </TouchableWithoutFeedback>
         <Image
-          source={{ uri: store.widgetImages.notification }}
+          source={{ uri: appContext.widgetImages.notification }}
           style={styles.image}
         />
       </View>

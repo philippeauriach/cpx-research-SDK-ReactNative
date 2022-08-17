@@ -1,39 +1,108 @@
-import React, { FunctionComponent, useEffect, useMemo, useRef } from "react";
+import React, {
+  FunctionComponent, useCallback, useEffect, useMemo, useRef 
+} from "react";
 import { AppState, AppStateStatus } from "react-native";
 import { useImmerReducer } from "use-immer";
 
-import { fetchSurveysAndTransactions, getWidgetImages, markTransactionAsPaid } from "./actions/apiActions";
+import { fetchSurveysAndTransactionsApi, ISurveysTransactionsTexts, markTransactionAsPaidApi } from "./api/api";
 import { Container } from "./components/container/Container";
-import { IAppContext, ICpxConfig, initialAppStore } from "./context/context";
+import AppStoreContext, {
+  emptyTexts, getInitialAppStore, IAppContext, ICpxConfig
+} from "./context/context";
 import appReducer from "./context/reducer";
 import { CpxSurveyCards } from "./cpxSurveyCards/CpxSurveyCards";
-import { deepPropsComparison, throwErrorIfColorStringsAreNoHexColor } from "./utils/helpers";
+import usePrevious from "./hooks/usePrevious";
+import { deepPropsComparison, getRequestParams, throwErrorIfColorStringsAreNoHexColor } from "./utils/helpers";
 
-const CpxResearch2: FunctionComponent<ICpxConfig> = (props) =>
+let CpxResearch: FunctionComponent<ICpxConfig> = config =>
 {
+  const {
+    bindFetchSurveysAndTransactions,
+    bindMarkTransactionAsPaid,
+    bindOpenWebView,
+    onSurveysUpdate: onSurveysUpdateCallback,
+    onTextsUpdate: onTextsUpdateCallback,
+    onTransactionsUpdate: onTransactionsUpdateCallback,
+    onWebViewWasClosed: onWebViewWasClosedCallback,
+  } = config;
+
   const fetchSurveysAndTransactionsIntervalRef = useRef<NodeJS.Timer>();
-  const [appContext, appDispatch] = useImmerReducer(appReducer, initialAppStore);
+  const [appContext, appDispatch] = useImmerReducer(appReducer, getInitialAppStore(config));
 
   const memoizedAppContext = useMemo<IAppContext>(
     () => ({ appContext, appDispatch }),
     [appContext, appDispatch]
   );
 
-  const startFetchInterval = (): void =>
+  const {
+    cpxState,
+    isNotificationWidgetHidden,
+    surveys,
+    texts,
+    transactions,
+  } = memoizedAppContext.appContext;
+
+  const requestParams = useMemo(
+    () => getRequestParams(config.appId, config.userId),
+    [config.appId, config.userId]
+  );
+
+  const previousSurveys = usePrevious(appContext.surveys);
+  const previousTransactions = usePrevious(appContext.transactions);
+  const previousTexts = usePrevious(appContext.texts);
+  const previousCpxState = usePrevious(appContext.cpxState);
+
+  const fetchSurveysAndTransactions = useCallback(async (): Promise<void> =>
   {
+    console.log("fetchSurveysAndTransactions");
+
+    let surveysAndTransactions: ISurveysTransactionsTexts | undefined;
+
+    try
+    {
+      surveysAndTransactions = await fetchSurveysAndTransactionsApi(requestParams);
+    }
+    catch (e)
+    {
+      appDispatch({
+        actionType: "updateAppContext",
+        payload: {
+          singleSurveyIdForWebView: undefined,
+          surveys: [],
+          texts: emptyTexts,
+          transactions: [],
+        }
+      });
+      return;
+    }
+
+    appDispatch({
+      actionType: "updateAppContext",
+      payload: {
+        singleSurveyIdForWebView: surveysAndTransactions.surveys?.[0]?.id,
+        surveys: surveysAndTransactions.surveys,
+        texts: surveysAndTransactions.texts,
+        transactions: surveysAndTransactions.transactions,
+      }
+    });
+  }, [requestParams, appDispatch]);
+
+  const startFetchInterval = useCallback((): void =>
+  {
+    if(fetchSurveysAndTransactionsIntervalRef.current)
+    {
+      return;
+    }
+
     fetchSurveysAndTransactionsIntervalRef.current = setInterval(
       async () =>
       {
-        if(appContext.cpxState === "webView" || appContext.cpxState === "webViewSingleSurvey")
-        {
-          return;
-        }
-
-        return fetchSurveysAndTransactions(this.state);
+        console.log("interval");
+        return fetchSurveysAndTransactions();
       },
-      120 * 1000 // 120 Seconds
+      5 * 1000 // 120 Seconds
     );
-  };
+  }, [fetchSurveysAndTransactions]);
 
   const stopFetchInterval = (): void =>
   {
@@ -43,19 +112,222 @@ const CpxResearch2: FunctionComponent<ICpxConfig> = (props) =>
     }
   };
 
+  const handleAppStateChange = useCallback((appState: AppStateStatus): void =>
+  {
+    if(appState === "active")
+    {
+      console.log("App has come to foreground. Start timer.");
+      void startFetchInterval();
+    }
+    else
+    {
+      console.log("App has gone to is inactive. Stop timer.");
+      void stopFetchInterval();
+    }
+  }, [startFetchInterval]);
+
+  const onTransactionsUpdate = useCallback((): void =>
+  {
+    console.log("transactions changed! " + transactions?.length + " transactions available");
+
+    if(onTransactionsUpdateCallback)
+    {
+      onTransactionsUpdateCallback(transactions);
+    }
+  }, [transactions, onTransactionsUpdateCallback]);
+
+  const markTransactionAsPaid = useCallback(async (transactionId: string, messageId: string): Promise<void> =>
+  {
+    await markTransactionAsPaidApi(transactionId, messageId, requestParams);
+    await fetchSurveysAndTransactions();
+  }, [requestParams, fetchSurveysAndTransactions]);
+
+  const onTextsUpdate = useCallback((): void =>
+  {
+    console.log("texts changed!");
+
+    if(onTextsUpdateCallback)
+    {
+      onTextsUpdateCallback(texts);
+    }
+  }, [texts, onTextsUpdateCallback]);
+
+  const openWebView = useCallback((surveyId?: string): void =>
+  {
+    appDispatch({
+      actionType: "updateAppContext",
+      payload: {
+        cpxState: "webViewSingleSurvey",
+        singleSurveyIdForWebView: surveyId
+      }
+    });
+  }, [appDispatch]);
+
+  const onWebViewWasClosed = useCallback(async (): Promise<void> =>
+  {
+    console.log("webView was closed");
+
+    await fetchSurveysAndTransactions();
+
+    if(onWebViewWasClosedCallback)
+    {
+      onWebViewWasClosedCallback();
+    }
+  }, [fetchSurveysAndTransactions, onWebViewWasClosedCallback]);
+
+  const onSurveysUpdate = useCallback((): void =>
+  {
+    console.log("surveys changed! " + surveys?.length + " surveys available");
+
+    if(onSurveysUpdateCallback)
+    {
+      onSurveysUpdateCallback(surveys);
+    }
+
+    if(cpxState === "webView" || cpxState === "webViewSingleSurvey")
+    {
+      // if the user currently uses the webView, do nothing
+      console.log("user currently uses the webView. return");
+      return;
+    }
+
+    if(surveys?.length > 0)
+    {
+      if(cpxState === "hidden")
+      {
+        console.log("show widgets");
+
+        appDispatch({
+          actionType: "setCpxState",
+          payload: { state: "widgets" }
+        });
+      }
+
+      if(isNotificationWidgetHidden)
+      {
+        console.log("show notification widget");
+
+        appDispatch({
+          actionType: "setNotificationWidgetHiding",
+          payload: { isHidden: false }
+        });
+      }
+    }
+    else
+    {
+      if(cpxState !== "hidden")
+      {
+        console.log("no surveys available. hide CPX Layer");
+
+        appDispatch({
+          actionType: "setCpxState",
+          payload: { state: "hidden" }
+        });
+      }
+    }
+  }, [cpxState, isNotificationWidgetHidden, surveys, appDispatch, onSurveysUpdateCallback]);
+
+  useEffect(() =>
+  {
+    console.log("[useEffect 1]");
+
+    bindMarkTransactionAsPaid?.(markTransactionAsPaid);
+    bindFetchSurveysAndTransactions?.(fetchSurveysAndTransactions);
+    bindOpenWebView?.(openWebView);
+  }, [
+    fetchSurveysAndTransactions,
+    markTransactionAsPaid,
+    openWebView,
+    bindMarkTransactionAsPaid,
+    bindFetchSurveysAndTransactions,
+    bindOpenWebView
+  ]);
+
+  useEffect(() =>
+  {
+    console.log("[useEffect 2]");
+
+    void fetchSurveysAndTransactions();
+  }, [fetchSurveysAndTransactions]);
+
+  useEffect(() =>
+  {
+    console.log("[useEffect 3]");
+
+    appDispatch({ actionType: "getWidgetImages" });
+  }, [appDispatch]);
+
+  useEffect(() =>
+  {
+    console.log("[useEffect 4]");
+
+    startFetchInterval();
+
+  }, [startFetchInterval]);
+
+  useEffect(() =>
+  {
+    console.log("[useEffect 5]");
+
+    AppState.addEventListener("change", handleAppStateChange);
+
+    return () =>
+    {
+      AppState.removeEventListener("change", handleAppStateChange);
+      stopFetchInterval();
+    };
+  }, [handleAppStateChange]);
+
+  useEffect(() =>
+  {
+    if((previousCpxState === "webViewSingleSurvey" || previousCpxState === "webView") &&
+      (cpxState !== "webView" && cpxState !== "webViewSingleSurvey"))
+    {
+      console.log("call onWebViewWasClosed.");
+      console.log("prev: " + previousCpxState);
+      console.log("now: " + cpxState);
+      void onWebViewWasClosed();
+    }
+  }, [cpxState, onWebViewWasClosed, previousCpxState]);
+
+  useEffect(() =>
+  {
+    if(JSON.stringify(previousSurveys) !== JSON.stringify(surveys))
+    {
+      console.log("call onSurveysUpdate");
+      onSurveysUpdate();
+    }
+  }, [onSurveysUpdate, previousSurveys, surveys]);
+
+  useEffect(() =>
+  {
+    if(JSON.stringify(previousTransactions) !== JSON.stringify(transactions))
+    {
+      onTransactionsUpdate();
+    }
+  }, [onTransactionsUpdate, previousTransactions, transactions]);
+
+  useEffect(() =>
+  {
+    if(JSON.stringify(previousTexts) !== JSON.stringify(texts))
+    {
+      onTextsUpdate();
+    }
+  }, [onTextsUpdate, previousTexts, texts]);
+
   useEffect(() =>
   {
     throwErrorIfColorStringsAreNoHexColor([
-      props.cornerWidget?.backgroundColor,
-      props.cornerWidget?.textColor,
-      props.sidebarWidget?.backgroundColor,
-      props.sidebarWidget?.textColor,
-      props.notificationWidget?.backgroundColor,
-      props.notificationWidget?.textColor
+      config.cornerWidget?.backgroundColor,
+      config.cornerWidget?.textColor,
+      config.sidebarWidget?.backgroundColor,
+      config.sidebarWidget?.textColor,
+      config.notificationWidget?.backgroundColor,
+      config.notificationWidget?.textColor
     ]);
-  }, [props.cornerWidget, props.notificationWidget, props.sidebarWidget]);
+  }, [config.cornerWidget, config.notificationWidget, config.sidebarWidget]);
 
-  if(props.isHidden)
+  if(config.isHidden)
   {
     return null;
   }
@@ -67,195 +339,7 @@ const CpxResearch2: FunctionComponent<ICpxConfig> = (props) =>
   );
 };
 
-class CpxResearch extends React.Component<ICpxConfig, IStore>
-{
-  private fetchSurveysAndTransactionsInterval: NodeJS.Timer | undefined;
-
-  private handleAppStateChange = (appState: AppStateStatus): void =>
-  {
-    if(appState === "active")
-    {
-      console.log("App has come to foreground. Start timer.");
-      void this.startFetchInterval();
-    }
-    else
-    {
-      console.log("App has gone to is inactive. Stop timer.");
-      void this.stopFetchInterval();
-    }
-  };
-
-  private onSurveysUpdate(): void
-  {
-    console.log("surveys changed! " + this.state.surveys?.length + " surveys available");
-
-    if(this.props.onSurveysUpdate)
-    {
-      this.props.onSurveysUpdate(this.state.surveys);
-    }
-
-    if(this.state.cpxState === "webView" || this.state.cpxState === "webViewSingleSurvey")
-    {
-      // if the user currently uses the webView, do nothing
-      console.log("user currently uses the webView. return");
-      return;
-    }
-
-    if(this.state.surveys?.length > 0)
-    {
-      if(this.state.cpxState === "hidden")
-      {
-        console.log("show widgets");
-        setCpxState("widgets", this.state);
-      }
-
-      if(this.state.isNotificationWidgetHidden)
-      {
-        console.log("show notification widget");
-        setNotificationWidgetHiding(false, this.state);
-      }
-    }
-    else
-    {
-      if(this.state.cpxState !== "hidden")
-      {
-        console.log("no surveys available. hide CPX Layer");
-        setCpxState("hidden", this.state);
-      }
-    }
-  }
-
-  private onTextsUpdate(): void
-  {
-    console.log("texts changed!");
-
-    if(this.props.onTextsUpdate)
-    {
-      this.props.onTextsUpdate(this.state.texts);
-    }
-  }
-
-  private async onWebViewWasClosed(): Promise<void>
-  {
-    console.log("webView was closed");
-
-    await fetchSurveysAndTransactions(this.state);
-
-    if(this.props.onWebViewWasClosed) 
-    {
-      this.props.onWebViewWasClosed();
-    }
-  }
-
-  private onTransactionsUpdate(): void
-  {
-    console.log("transactions changed! " + this.state.transactions?.length + " transactions available");
-
-    if(this.props.onTransactionsUpdate)
-    {
-      this.props.onTransactionsUpdate(this.state.transactions);
-    }
-  }
-
-  private openWebView(surveyId?: string): void
-  {
-    this.setState({ singleSurveyIdForWebView: surveyId }, () =>
-    {
-      setCpxState("webViewSingleSurvey", this.state);
-    });
-  }
-
-  private async markTransactionAsPaid(transactionId: string, messageId: string): Promise<void>
-  {
-    await markTransactionAsPaid(transactionId, messageId, this.state);
-    await fetchSurveysAndTransactions(this.state);
-  }
-
-  private async fetchSurveysAndTransactions(): Promise<void>
-  {
-    await fetchSurveysAndTransactions(this.state);
-  }
-
-  public shouldComponentUpdate(nextProps: Readonly<ICpxConfig>, nextState: Readonly<IStore>): boolean
-  {
-    console.log("shouldComponentUpdate");
-
-    const didPropsChange = !deepPropsComparison(this.props, nextProps);
-    const didStateChange = !deepPropsComparison(this.state, nextState);
-
-    console.log("didPropsChange: " + didPropsChange.valueOf());
-    console.log("didStateChange: " + didStateChange.valueOf());
-
-    return didPropsChange || didStateChange;
-  }
-
-  public componentDidUpdate(_prevProps: Readonly<ICpxConfig>, prevState: Readonly<IStore>): void
-  {
-    console.log("[componentDidUpdate]");
-
-    if((prevState.cpxState === "webViewSingleSurvey" || prevState.cpxState === "webView") &&
-      (this.state.cpxState !== "webView" && this.state.cpxState !== "webViewSingleSurvey"))
-    {
-      console.log("call onWebViewWasClosed.");
-      console.log("prev: " + prevState.cpxState);
-      console.log("now: " + this.state.cpxState);
-      void this.onWebViewWasClosed();
-    }
-
-    if(JSON.stringify(prevState.surveys) !== JSON.stringify(this.state.surveys))
-    {
-      console.log("call onSurveysUpdate");
-      this.onSurveysUpdate();
-    }
-
-    if(JSON.stringify(prevState.transactions) !== JSON.stringify(this.state.transactions))
-    {
-      this.onTransactionsUpdate();
-    }
-
-    if(JSON.stringify(prevState.texts) !== JSON.stringify(this.state.texts))
-    {
-      this.onTextsUpdate();
-    }
-  }
-
-  public async componentDidMount(): Promise<void>
-  {
-    console.log("componentDidMount");
-
-    this.props.bindMarkTransactionAsPaid?.(this.markTransactionAsPaid);
-    this.props.bindFetchSurveysAndTransactions?.(this.fetchSurveysAndTransactions);
-    this.props.bindOpenWebView?.(this.openWebView);
-
-    void await fetchSurveysAndTransactions(this.state);
-    getWidgetImages(this.state);
-
-    this.startFetchInterval();
-
-    AppState.addEventListener("change", this.handleAppStateChange);
-  }
-
-  public componentWillUnmount(): void
-  {
-    AppState.removeEventListener("change", this.handleAppStateChange);
-
-    this.stopFetchInterval();
-  }
-
-  public render(): React.ReactElement | null
-  {
-    if(this.props.isHidden)
-    {
-      return null;
-    }
-
-    return (
-      <AppStoreContext.Provider value={memoizedAppContext}>
-        <Container/>
-      </AppStoreContext.Provider>
-    );
-  }
-}
+CpxResearch = React.memo(CpxResearch, deepPropsComparison);
 
 export default CpxResearch;
 export { CpxSurveyCards };

@@ -3,7 +3,7 @@ import {
   View, Image, StyleProp, ViewStyle, ImageStyle, TouchableWithoutFeedback
 } from "react-native";
 
-import { IStore, StoreContext } from "../../utils/store";
+import AppStoreContext, { IAppContext } from "../../context/context";
 import { globalStyles } from "../../utils/styles";
 import styles from "./CornerWidget.style";
 
@@ -14,14 +14,14 @@ interface IProps
 
 export const CornerWidget: FunctionComponent<IProps> = ({ onPress }) =>
 {
-  const store = useContext<IStore>(StoreContext);
+  const { appContext } = useContext<IAppContext>(AppStoreContext);
 
-  if(!store.config.cornerWidget || !store.widgetImages.corner)
+  if(!appContext.config.cornerWidget || !appContext.widgetImages.corner)
   {
     return null;
   }
 
-  const { size } = store.config.cornerWidget;
+  const { size } = appContext.config.cornerWidget;
 
   const buttonSize = size * Math.sqrt(2);
   const buttonOffset = -(size * Math.sqrt(2) / 2);
@@ -30,7 +30,7 @@ export const CornerWidget: FunctionComponent<IProps> = ({ onPress }) =>
   let containerStyle: StyleProp<ViewStyle>;
   let imageStyle: StyleProp<ImageStyle>;
 
-  switch (store.config.cornerWidget.position)
+  switch (appContext.config.cornerWidget.position)
   {
     case "topleft":
       buttonStyle = {
@@ -97,7 +97,7 @@ export const CornerWidget: FunctionComponent<IProps> = ({ onPress }) =>
   return (
     <View pointerEvents="box-none" style={[globalStyles.widgetsShadow, styles.container, containerStyle]}>
       <Image
-        source={{ uri: store.widgetImages.corner }}
+        source={{ uri: appContext.widgetImages.corner }}
         style={[styles.image, imageStyle, {
           height: size,
           width: size,

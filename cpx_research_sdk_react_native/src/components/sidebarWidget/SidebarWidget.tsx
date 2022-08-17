@@ -3,7 +3,7 @@ import {
   View, Image, StyleProp, ViewStyle, TouchableWithoutFeedback
 } from "react-native";
 
-import { IStore, StoreContext } from "../../utils/store";
+import AppStoreContext, { IAppContext } from "../../context/context";
 import { globalStyles } from "../../utils/styles";
 import styles from "./SidebarWidget.style";
 
@@ -20,14 +20,14 @@ export const SidebarWidget: FunctionComponent<IProps> = ({
   onPress
 }) =>
 {
-  const store = useContext<IStore>(StoreContext);
+  const { appContext } = useContext<IAppContext>(AppStoreContext);
 
-  if(!store.config.sidebarWidget || !store.widgetImages.sidebar)
+  if(!appContext.config.sidebarWidget || !appContext.widgetImages.sidebar)
   {
     return null;
   }
 
-  const { height, width } = store.config.sidebarWidget;
+  const { height, width } = appContext.config.sidebarWidget;
 
   const renderedHeight = Math.min(height, (containerHeight || 0) * 0.8);
   const renderedWidth = Math.min(width, (containerWidth || 0) * 0.25);
@@ -39,7 +39,7 @@ export const SidebarWidget: FunctionComponent<IProps> = ({
     width: renderedWidth,
   };
 
-  switch (store.config.sidebarWidget.position)
+  switch (appContext.config.sidebarWidget.position)
   {
     case "left":
       containerStyle = {
@@ -61,7 +61,7 @@ export const SidebarWidget: FunctionComponent<IProps> = ({
     <TouchableWithoutFeedback onPress={onPress}>
       <View style={[globalStyles.widgetsShadow, styles.container, containerStyle]}>
         <Image
-          source={{ uri: store.widgetImages.sidebar }}
+          source={{ uri: appContext.widgetImages.sidebar }}
           style={styles.image}
         />
       </View>
