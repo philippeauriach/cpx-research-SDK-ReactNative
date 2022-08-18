@@ -6,6 +6,11 @@ import { IAppStore } from "./context";
 
 export const updateAppContext = (state: IAppStore, payload: IUpdateAppContext["payload"]): void =>
 {
+  if(state.cpxState === "webViewSingleSurvey" && payload.singleSurveyIdForWebView != null)
+  {
+    delete payload.singleSurveyIdForWebView; // otherwise home url would change and cause a webView reload
+  }
+
   Object.keys(payload).forEach(key =>
   {
     state[key as keyof typeof state] = payload[key as keyof typeof payload];

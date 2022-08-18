@@ -1,4 +1,6 @@
-import React, { FunctionComponent, useContext, useState } from "react";
+import React, {
+  FunctionComponent, useCallback, useContext, useMemo, useState 
+} from "react";
 import {
   Image, TouchableWithoutFeedback, View,
 } from "react-native";
@@ -28,8 +30,10 @@ export const WebviewWrapper: FunctionComponent = () =>
 {
   const { appContext, appDispatch } = useContext<IAppContext>(AppStoreContext);
 
+  const { config: { appId, userId } } = appContext;
+
   const baseUrl = urls.baseUrl + endpoints.homeEndpoint;
-  const requestParams = getRequestParams(appContext.config.appId, appContext.config.userId);
+  const requestParams = useMemo(() => getRequestParams(appId, userId), [appId, userId]);
 
   const tabs: ITabs = {
     help: baseUrl + buildQueryString({
@@ -49,6 +53,16 @@ export const WebviewWrapper: FunctionComponent = () =>
   const [activeTab, setActiveTab] = useState<keyof typeof tabs>("home");
   const [isLoading, setIsLoading] = useState(false);
   const [webViewContainerWidth, setWebViewContainerWidth] = useState<number | undefined>();
+
+  const onLoadStart = useCallback((): void =>
+  {
+    setIsLoading(true);
+  }, []);
+
+  const onLoadEnd = useCallback((): void =>
+  {
+    setIsLoading(false);
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -99,10 +113,12 @@ export const WebviewWrapper: FunctionComponent = () =>
           </>
         )}
         <WebView
+          appDispatch={appDispatch}
+          requestParams={requestParams}
           activeTab={activeTab}
           currentUrl={tabs[activeTab]}
-          onLoadEnd={() => setIsLoading(false)}
-          onLoadStart={() => setIsLoading(true)}
+          onLoadEnd={onLoadEnd}
+          onLoadStart={onLoadStart}
         />
       </View>
     </View>

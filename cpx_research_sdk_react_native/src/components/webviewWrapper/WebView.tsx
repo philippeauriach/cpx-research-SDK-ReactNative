@@ -1,18 +1,20 @@
 import axios from "axios";
-import React, { Component, ErrorInfo, ReactElement } from "react";
+import React, { Component, Dispatch, ErrorInfo, ReactElement } from "react";
 import { Text } from "react-native";
 import { WebView as ReactNativeWebView } from "react-native-webview";
 
-import AppStoreContext, { IAppContext } from "../../context/context";
+import { IAppContextActions } from "../../context/reducer";
 import { endpoints, urls } from "../../utils/globals";
-import { getRequestParams } from "../../utils/helpers";
+import { deepPropsComparison, IRequestParams } from "../../utils/helpers";
 
 interface IProps
 {
   activeTab: string;
+  appDispatch: Dispatch<IAppContextActions>;
   currentUrl: string;
   onLoadEnd: () => void;
   onLoadStart: () => void;
+  requestParams: IRequestParams;
 }
 
 interface IState
@@ -30,7 +32,7 @@ class WebView extends Component<IProps, IState>
 
   public shouldComponentUpdate(nextProps: Readonly<IProps>): boolean
   {
-    return this.props.activeTab !== nextProps.activeTab;
+    return !deepPropsComparison(this.props, nextProps);
   }
 
   private static getDerivedStateFromError(error: any): { hasError: boolean }
@@ -45,8 +47,8 @@ class WebView extends Component<IProps, IState>
     console.error("WebView did catch an error: ", error, errorInfo);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  private onError = async (appStore: IAppContext, nativeEvent: any, error?: string): Promise<void> =>
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars,max-len
+  private onError = async (appDispatch: Dispatch<IAppContextActions>, requestParams: IRequestParams, nativeEvent: any, error?: string): Promise<void> =>
   {
     if(error) 
     {
@@ -61,7 +63,7 @@ class WebView extends Component<IProps, IState>
     {
       await axios.get(urls.baseUrl + endpoints.homeEndpoint, {
         params: {
-          ...getRequestParams(appStore.appContext.config.appId, appStore.appContext.config.userId),
+          requestParams,
           webViewErrorEvent: nativeEvent,
         }
       });
@@ -71,7 +73,7 @@ class WebView extends Component<IProps, IState>
       console.log("an error occurred while logging the webViewError", e);
     }
 
-    appStore.appDispatch({
+    appDispatch({
       actionType: "setCpxState",
       payload: { state: "widgets" }
     });
@@ -85,26 +87,22 @@ class WebView extends Component<IProps, IState>
     }
 
     return (
-      <AppStoreContext.Consumer>
-        {appStore => (
-          <ReactNativeWebView
-            {...this.props}
-            onError={(syntheticEvent: any) =>
-            {
-              const { nativeEvent } = syntheticEvent;
-              console.error("[WebView onError]: ", nativeEvent);
-              void this.onError(appStore, nativeEvent, nativeEvent.description);
-            }}
-            onHttpError={(syntheticEvent: any) => 
-            {
-              const { nativeEvent } = syntheticEvent;
-              console.error("[WebView onHttpError]: WebView received error: ", nativeEvent);
-              void this.onError(appStore, nativeEvent, nativeEvent.statusCode + " - " + nativeEvent.description);
-            }}
-            source={{ uri: this.props.currentUrl }}
-          />
-        )}
-      </AppStoreContext.Consumer>
+      <ReactNativeWebView
+        {...this.props}
+        onError={(syntheticEvent: any) =>
+        {
+          const { nativeEvent } = syntheticEvent;
+          console.error("[WebView onError]: ", nativeEvent);
+          void this.onError(this.props.appDispatch, this.props.requestParams, nativeEvent, nativeEvent.description);
+        }}
+        onHttpError={(syntheticEvent: any) => 
+        {
+          const { nativeEvent } = syntheticEvent;
+          console.error("[WebView onHttpError]: WebView received error: ", nativeEvent);
+          void this.onError(this.props.appDispatch, this.props.requestParams, nativeEvent, nativeEvent.statusCode + " - " + nativeEvent.description);
+        }}
+        source={{ uri: this.props.currentUrl }}
+      />
     );
   }
 }

@@ -54,8 +54,6 @@ let CpxResearch: FunctionComponent<ICpxConfig> = config =>
 
   const fetchSurveysAndTransactions = useCallback(async (): Promise<void> =>
   {
-    console.log("fetchSurveysAndTransactions");
-
     let surveysAndTransactions: ISurveysTransactionsTexts | undefined;
 
     try
@@ -91,15 +89,12 @@ let CpxResearch: FunctionComponent<ICpxConfig> = config =>
   {
     if(fetchIntervalRef.current)
     {
-      console.log("clear existing fetch interval");
       clearInterval(fetchIntervalRef.current);
     }
   };
 
   const startFetchInterval = useCallback((): void =>
   {
-    console.log("startFetchInterval");
-
     stopFetchInterval();
 
     fetchIntervalRef.current = setInterval(
@@ -187,7 +182,6 @@ let CpxResearch: FunctionComponent<ICpxConfig> = config =>
     if(cpxState === "webView" || cpxState === "webViewSingleSurvey")
     {
       // if the user currently uses the webView, do nothing
-      console.log("user currently uses the webView. return");
       return;
     }
 
@@ -273,13 +267,6 @@ let CpxResearch: FunctionComponent<ICpxConfig> = config =>
       (cpxState !== "webView" && cpxState !== "webViewSingleSurvey"))
     {
       void onWebViewWasClosed();
-      startFetchInterval();
-    }
-    else if((previousCpxState !== "webView" && previousCpxState !== "webViewSingleSurvey") &&
-      (cpxState === "webView" || cpxState === "webViewSingleSurvey"))
-    {
-      console.log("webview was opened");
-      stopFetchInterval();
     }
   }, [cpxState, onWebViewWasClosed, previousCpxState, startFetchInterval]);
 
