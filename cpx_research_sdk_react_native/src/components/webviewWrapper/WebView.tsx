@@ -89,6 +89,7 @@ class WebView extends Component<IProps, IState>
     return (
       <ReactNativeWebView
         {...this.props}
+        setSupportMultipleWindows={false}
         onError={(syntheticEvent: any) =>
         {
           const { nativeEvent } = syntheticEvent;
