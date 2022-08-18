@@ -1,8 +1,7 @@
 import React, { FunctionComponent, useContext, useState } from "react";
 import { SafeAreaView, View } from "react-native";
 
-import { setCpxState } from "../../actions/applicationActions";
-import { IStore, StoreContext } from "../../utils/store";
+import AppStoreContext, { IAppContext } from "../../context/context";
 import { CornerWidget } from "../cornerWidget/CornerWidget";
 import { NotificationWidget } from "../notificationWidget/NotificationWidget";
 import { SidebarWidget } from "../sidebarWidget/SidebarWidget";
@@ -11,12 +10,12 @@ import styles from "./Container.style";
 
 export const Container: FunctionComponent = () =>
 {
-  const store = useContext<IStore>(StoreContext);
+  const { appContext, appDispatch } = useContext<IAppContext>(AppStoreContext);
 
   const [containerHeight, setContainerHeight] = useState<number | undefined>();
   const [containerWidth, setContainerWidth] = useState<number | undefined>();
 
-  if(store.cpxState === "hidden")
+  if(appContext.cpxState === "hidden")
   {
     return null;
   }
@@ -24,10 +23,16 @@ export const Container: FunctionComponent = () =>
   const onWidgetPress = (isSingleSurvey?: boolean): void =>
   {
     console.log("open webview");
-    setCpxState(isSingleSurvey ? "webViewSingleSurvey" : "webView", store);
+
+    appDispatch({
+      actionType: "setCpxState",
+      payload: {
+        state: isSingleSurvey ? "webViewSingleSurvey" : "webView",
+      }
+    });
   };
 
-  const isWebViewActive = store.cpxState === "webView" || store.cpxState === "webViewSingleSurvey";
+  const isWebViewActive = appContext.cpxState === "webView" || appContext.cpxState === "webViewSingleSurvey";
 
   return (
     <SafeAreaView
@@ -41,17 +46,17 @@ export const Container: FunctionComponent = () =>
           setContainerHeight(event.nativeEvent.layout.height);
           setContainerWidth(event.nativeEvent.layout.width);
         }}>
-        {store.cpxState === "widgets" && (
+        {appContext.cpxState === "widgets" && (
           <>
-            <CornerWidget onPress={() => onWidgetPress(store.config.cornerWidget?.isSingleSurvey)}/>
+            <CornerWidget onPress={() => onWidgetPress(appContext.config.cornerWidget?.isSingleSurvey)}/>
             <SidebarWidget
-              onPress={() => onWidgetPress(store.config.sidebarWidget?.isSingleSurvey)}
+              onPress={() => onWidgetPress(appContext.config.sidebarWidget?.isSingleSurvey)}
               containerHeight={containerHeight}
               containerWidth={containerWidth}
             />
-            {!store.isNotificationWidgetHidden && (
+            {!appContext.isNotificationWidgetHidden && (
               <NotificationWidget
-                onPress={() => onWidgetPress(store.config.notificationWidget?.isSingleSurvey)}
+                onPress={() => onWidgetPress(appContext.config.notificationWidget?.isSingleSurvey)}
                 containerHeight={containerHeight}
                 containerWidth={containerWidth}
               />

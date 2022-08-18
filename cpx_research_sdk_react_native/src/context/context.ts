@@ -1,4 +1,8 @@
-import React from "react";
+/* eslint-disable @typescript-eslint/no-empty-function */
+
+import { createContext, Dispatch } from "react";
+
+import { IAppContextActions } from "./reducer";
 
 interface IWidgetStyle
 {
@@ -52,7 +56,7 @@ export interface ICpxConfig
   userId: string;
 }
 
-export type ICpxState = "hidden" | "webView" | "webViewSingleSurvey" | "widgets";
+export type TCpxState = "hidden" | "webView" | "webViewSingleSurvey" | "widgets";
 
 interface IWidgetImages
 {
@@ -68,42 +72,53 @@ export interface ITexts
   shortcutMin: string;
 }
 
-export interface IStore
-{
-  config: ICpxConfig;
-  cpxState: ICpxState;
-  isNotificationWidgetHidden: boolean;
-  notify(): void;
-  singleSurveyIdForWebView?: any;
-  subscribers: ((store: IStore) => void)[];
-  surveys: any[];
-  texts: ITexts;
-  transactions: any[];
-  widgetImages: IWidgetImages;
-}
-
-export const StoreContext = React.createContext<IStore>(null as unknown as IStore);
-
 export const emptyTexts: ITexts = {
   currencyPlural: "",
   currencySingular: "",
   shortcutMin: "",
 };
 
-export const createStore = (config: ICpxConfig): IStore => ({
-  config,
+export interface IAppStore
+{
+  config: ICpxConfig;
+  cpxState: TCpxState;
+  isNotificationWidgetHidden: boolean;
+  singleSurveyIdForWebView?: any;
+  surveys: any[];
+  texts: ITexts;
+  transactions: any[];
+  widgetImages: IWidgetImages;
+}
+ 
+export const initialAppStore: IAppStore = {
+  config: {
+    accentColor: "",
+    appId: "-1",
+    userId: "-1",
+  },
   cpxState: "hidden",
   isNotificationWidgetHidden: false,
-  notify()
-  {
-    this.subscribers.forEach((subscriber: (store: IStore) => void) =>
-      subscriber(this)
-    );
-  },
   singleSurveyIdForWebView: undefined,
-  subscribers: [],
   surveys: [],
   texts: emptyTexts,
   transactions: [],
   widgetImages: {},
+};
+
+export const getInitialAppStore = (config: ICpxConfig): IAppStore => ({
+  ...initialAppStore,
+  config
 });
+
+export interface IAppContext
+{
+  appContext: IAppStore;
+  appDispatch: Dispatch<IAppContextActions>;
+}
+
+const AppStoreContext = createContext<IAppContext>({
+  appContext: initialAppStore,
+  appDispatch: () => {},
+});
+
+export default AppStoreContext;

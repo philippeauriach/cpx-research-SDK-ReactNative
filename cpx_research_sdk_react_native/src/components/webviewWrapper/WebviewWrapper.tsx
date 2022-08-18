@@ -1,17 +1,14 @@
-import React, { FunctionComponent, useContext, useState } from "react";
+import React, {
+  FunctionComponent, useCallback, useContext, useMemo, useState 
+} from "react";
 import {
-  ActivityIndicator,
   Image, TouchableWithoutFeedback, View,
 } from "react-native";
-// @ts-ignore
 import ProgressBar from "react-native-progress/Bar";
-// @ts-ignore
-import { WebViewProps } from "react-native-webview";
 
-import { setCpxState } from "../../actions/applicationActions";
+import AppStoreContext, { IAppContext } from "../../context/context";
 import { endpoints, urls } from "../../utils/globals";
 import { buildQueryString, getRequestParams } from "../../utils/helpers";
-import { IStore, StoreContext } from "../../utils/store";
 import WebView from "./WebView";
 import styles, { progressBarHeight } from "./Webview.style";
 import { WebviewIcon } from "./webviewIcon/WebviewIcon";
@@ -31,10 +28,12 @@ interface ITabs
 
 export const WebviewWrapper: FunctionComponent = () =>
 {
-  const store = useContext<IStore>(StoreContext);
+  const { appContext, appDispatch } = useContext<IAppContext>(AppStoreContext);
+
+  const { config: { appId, userId } } = appContext;
 
   const baseUrl = urls.baseUrl + endpoints.homeEndpoint;
-  const requestParams = getRequestParams(store);
+  const requestParams = useMemo(() => getRequestParams(appId, userId), [appId, userId]);
 
   const tabs: ITabs = {
     help: baseUrl + buildQueryString({
@@ -43,7 +42,7 @@ export const WebviewWrapper: FunctionComponent = () =>
     }),
     home: baseUrl + buildQueryString({
       ...requestParams,
-      survey_id: store.cpxState === "webViewSingleSurvey" ? store.singleSurveyIdForWebView : undefined,
+      survey_id: appContext.cpxState === "webViewSingleSurvey" ? appContext.singleSurveyIdForWebView : undefined,
     }),
     settings: baseUrl + buildQueryString({
       ...requestParams,
@@ -54,6 +53,16 @@ export const WebviewWrapper: FunctionComponent = () =>
   const [activeTab, setActiveTab] = useState<keyof typeof tabs>("home");
   const [isLoading, setIsLoading] = useState(false);
   const [webViewContainerWidth, setWebViewContainerWidth] = useState<number | undefined>();
+
+  const onLoadStart = useCallback((): void =>
+  {
+    setIsLoading(true);
+  }, []);
+
+  const onLoadEnd = useCallback((): void =>
+  {
+    setIsLoading(false);
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -76,7 +85,11 @@ export const WebviewWrapper: FunctionComponent = () =>
         <TouchableWithoutFeedback onPress={() =>
         {
           console.log("close webView");
-          setCpxState("widgets", store);
+
+          appDispatch({
+            actionType: "setCpxState",
+            payload: { state: "widgets" }
+          });
         }}>
           <View style={webviewIconStyles.iconWrapper}>
             <Image style={webviewIconStyles.iconImage} source={closeIcon}/>
@@ -94,16 +107,18 @@ export const WebviewWrapper: FunctionComponent = () =>
                 unfilledColor="white"
                 borderColor="transparent"
                 borderWidth={0}
-                color={store.config.accentColor}
+                color={appContext.config.accentColor}
               />
             </View>
           </>
         )}
         <WebView
+          appDispatch={appDispatch}
+          requestParams={requestParams}
           activeTab={activeTab}
           currentUrl={tabs[activeTab]}
-          onLoadEnd={() => setIsLoading(false)}
-          onLoadStart={() => setIsLoading(true)}
+          onLoadEnd={onLoadEnd}
+          onLoadStart={onLoadStart}
         />
       </View>
     </View>

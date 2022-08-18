@@ -1,7 +1,7 @@
 import React, { FunctionComponent, useContext } from "react";
 import { Image, ImageSourcePropType, TouchableOpacity } from "react-native";
 
-import { IStore, StoreContext } from "../../../utils/store";
+import AppStoreContext, { IAppContext } from "../../../context/context";
 import styles from "./WebviewIcon.style";
 
 interface IProps
@@ -17,14 +17,14 @@ export const WebviewIcon: FunctionComponent<IProps> = ({
   onPress,
 }) =>
 {
-  const store = useContext<IStore>(StoreContext);
+  const { appContext } = useContext<IAppContext>(AppStoreContext);
 
   return (
     <TouchableOpacity
       activeOpacity={.6}
       disabled={isActive}
       onPress={onPress}
-      style={[styles.iconWrapper, isActive && { backgroundColor: store.config.accentColor }]}>
+      style={[styles.iconWrapper, isActive && { backgroundColor: appContext.config.accentColor }]}>
       <Image style={styles.iconImage} source={icon}/>
     </TouchableOpacity>
   );
