@@ -61,3 +61,5 @@ buck-out/
 cpx_research_sdk_react_native/lib
 
 *.hprof
+
+gradle.properties
