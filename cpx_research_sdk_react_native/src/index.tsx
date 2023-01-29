@@ -103,7 +103,7 @@ let CpxResearch: FunctionComponent<ICpxConfig> = config =>
         console.log("fetch interval");
         return fetchSurveysAndTransactions();
       },
-      5 * 1000 // 120 Seconds
+      120 * 1000 // 120 Seconds
     );
   }, [fetchSurveysAndTransactions]);
 
