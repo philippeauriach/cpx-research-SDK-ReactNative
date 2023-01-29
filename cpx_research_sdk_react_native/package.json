@@ -13,7 +13,7 @@
     "Readme.md"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "rm -rf lib && tsc",
     "check-types": "tsc --noEmit",
     "lint": "yarn check-types && eslint --ext .js,.jsx,.ts,.tsx src",
     "lint:fix": "eslint --fix --ext .js,.jsx,.ts,.tsx src",
