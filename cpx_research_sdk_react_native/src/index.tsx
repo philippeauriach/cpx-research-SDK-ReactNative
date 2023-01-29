@@ -252,11 +252,11 @@ let CpxResearch: FunctionComponent<ICpxConfig> = config =>
 
   useEffect(() =>
   {
-    AppState.addEventListener("change", handleAppStateChange);
+    const appStateChangeListener = AppState.addEventListener("change", handleAppStateChange);
 
     return () =>
     {
-      AppState.removeEventListener("change", handleAppStateChange);
+      appStateChangeListener.remove();
       stopFetchInterval();
     };
   }, [handleAppStateChange]);
